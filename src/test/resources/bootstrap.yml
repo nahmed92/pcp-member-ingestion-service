@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: pcp-member-ingestion-service
+
+  profiles:
+    active: test
