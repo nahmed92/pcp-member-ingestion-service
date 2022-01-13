@@ -29,14 +29,15 @@ public class PcpCalculationServiceClient {
 	private RestTemplate restTemplate;
 	
 	public ValidateProviderResponse validateProvider() {
-		log.info("START PCPSearchService.validateProvider");
+		log.info("Call PCP Calculation Service Validate Provider");
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(pcpCalculationServiceEndpoint);
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		ResponseEntity<ValidateProviderResponse> responseEntity = null;
 		try {
-			responseEntity = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,  new HttpEntity<>(headers), ValidateProviderResponse.class);
+			responseEntity = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST, 
+					new HttpEntity<>(headers), ValidateProviderResponse.class);
 		} catch (RestClientException e) {
 			throw new RuntimeException("Rest Client Exception ["+e.getCause()+"] and Messagge ["+e.getMessage());
 		} catch (URISyntaxException e) {

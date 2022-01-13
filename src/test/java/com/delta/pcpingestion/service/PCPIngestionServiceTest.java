@@ -96,13 +96,14 @@ public class PCPIngestionServiceTest {
 
 	@Test
 	public void shouldCreateNewPCPMembercontract() throws Exception {
+		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1558}'}";
 		Member member = new Member();
 		member.setPcpMembers(pcpMember);
 		ResponseEntity<Member> pcpMemberResp = new ResponseEntity<Member>(member, HttpStatus.OK);
 		when(tibcoRestTemplate
-				.fetchPcpmemberFromTibco("{'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1558}'}"))
+				.fetchPcpmemberFromTibco(tibcoQuery))
 						.thenReturn(pcpMemberResp);
-		pcpIngestionService.createPCPContract("{'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1558}'}");
+		pcpIngestionService.createPCPContract(tibcoQuery);
 		List<PCPMemberContractEntity> contract = repo.findAll();
 		log.info("contract is["+contract+"]");
 		verify(repo, times(1));

@@ -3,6 +3,10 @@ package com.delta.pcpingestion.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.delta.pcpingestion.client.ValidateProviderResponse;
 import com.delta.pcpingestion.dto.PcpMember;
 import com.delta.pcpingestion.entity.PCPMemberContractEntity;
+import com.delta.pcpingestion.mtv.entities.MbrProvNtwkAssn;
 import com.delta.pcpingestion.service.PCPIngestionService;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.deltadental.platform.common.exception.ServiceError;
@@ -74,17 +80,14 @@ public class PcpIngestionController {
 		return new ResponseEntity<List<PCPMemberContractEntity>>(contracts,HttpStatus.OK);
 	}
 	
-    @ApiResponses({ @ApiResponse(code = 200, message = "Successfully validated provider.", response = com.delta.pcpingestion.client.ValidateProviderResponse.class),
-                    @ApiResponse(code = 400, message = "Bad request.", response = ServiceError.class),
-                    @ApiResponse(code = 404, message = "Unable validate provider.", response = ServiceError.class),
-                    @ApiResponse(code = 500, message = "Internal server error.", response = ServiceError.class) })
-	@ResponseBody
-	@MethodExecutionTime
-    @GetMapping(value = "/callPcpCalculation", produces = {MediaType.APPLICATION_JSON_VALUE})
-	public void validateProvider() {
-		log.info("START PcpIngestionController.validateProvider");
-        service.validateProvider();	
-		log.info("END PCPCalculationServiceController.validateProvider");
-	}
-	
+    
+    @ApiResponses({ @ApiResponse(code = 200, message = "Successfully Enable Disabled Tibco Service Call"),
+        @ApiResponse(code = 400, message = "Bad request.", response = ServiceError.class),
+        @ApiResponse(code = 404, message = "Unable validate provider.", response = ServiceError.class),
+        @ApiResponse(code = 500, message = "Internal server error.", response = ServiceError.class) })
+		@GetMapping(value = "/enableDisbaleTibcoServiceCall", produces = {MediaType.APPLICATION_JSON_VALUE})
+		public void enableDisableTibcoService(@RequestParam("isUsedTibco") Boolean isUsedTibco) {
+		service.enableDisbaleTibcoServiceCall(isUsedTibco);
+     }
+    
 }

@@ -32,7 +32,7 @@ public class TibcoClient {
 	private RestTemplate restTemplate;
 	
 	
-	public ResponseEntity<Member> fetchPcpmemberFromTibco(String pcpMembersRequest) {
+	public ResponseEntity<Member> fetchPcpmemberFromTibco(String tibcoQueryStr) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(tibcoPcpMemberUrl);
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
@@ -40,7 +40,7 @@ public class TibcoClient {
 		ResponseEntity<Member> response = null;
 		try {
 			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,
-					new HttpEntity<>(pcpMembersRequest, headers), Member.class);
+					new HttpEntity<>(tibcoQueryStr, headers), Member.class);
 		} catch (RestClientException e) {
 			throw new RuntimeException("Exception in Rest client {}", e);
 		} catch (URISyntaxException e) {

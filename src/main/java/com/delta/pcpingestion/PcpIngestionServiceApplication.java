@@ -12,14 +12,22 @@ import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+
 @SpringBootApplication
-@EnableJpaAuditing
+//@EnableAutoConfiguration
+@ComponentScan(basePackages = { "com.delta.pcpingestion.*" })
+@EnableSwagger2
+@Slf4j
 public class PcpIngestionServiceApplication {
 
 	public static void main(String[] args) {
