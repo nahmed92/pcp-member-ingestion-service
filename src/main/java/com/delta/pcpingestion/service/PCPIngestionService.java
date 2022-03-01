@@ -4,9 +4,13 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +64,13 @@ public class PCPIngestionService {
 
 	private List<String> contractCreatedForTodate = new ArrayList<>();
 
-    @Value("${metavance.pcp.ingestion.service.last_maintanence_time_stamp:null}")
+	@Value("${metavance.pcp.ingestion.service.last_maintanence_time_stamp:null}")
 	private String last_maintanence_time_stamp = null;
 
-	@Value("${pcp.ingestion.service.tibcoQueryStr}")
-	private String tibcoQueryStr;
+	private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${states}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
+
+	@Value("#{${pcp.members.tibcoqueryqtr.parammap}}")
+	private Map<String, String> params = new HashMap<>();
 
 	@Value("${pcp.ingestion.service.isUsedTibco}")
 	private Boolean isUsedTibco = Boolean.TRUE;
@@ -72,13 +78,11 @@ public class PCPIngestionService {
 	@Value("${pcp.ingestion.service.state}")
 	private String state;
 
-	 @Scheduled(initialDelayString = "${job.pcp.contract.initial.delay}", 
-			 fixedRateString = "${job.pcp.contract.fixed.delay}")
-	 @MethodExecutionTime
+	@Scheduled(initialDelayString = "${job.pcp.contract.initial.delay}", fixedRateString = "${job.pcp.contract.fixed.delay}")
+	@MethodExecutionTime
 	public void scheduleToCreatedPCPContractFixedRateTask() {
 		log.info("Schedular Call to create pcp contract for Every 5 Second..");
 		if (isUsedTibco) {
-			// Call Tibco Service to Create Contract Records
 			createPCPContract(tibcoQueryStr);
 		} else {
 			// Call Metavence to create Contract Records
@@ -86,8 +90,7 @@ public class PCPIngestionService {
 		}
 	}
 
-	@Scheduled(initialDelayString = "${job.post.contract.tocalculation.initial.delay}", 
-			fixedRateString = "${job.post.contract.tocalculation.fixed.delay}")
+	@Scheduled(initialDelayString = "${job.post.contract.tocalculation.initial.delay}", fixedRateString = "${job.post.contract.tocalculation.fixed.delay}")
 	@MethodExecutionTime
 	public void schedulePostContractDataOnPCPCalculationFixedRateTask() {
 		log.info("Schedular Call for Posting Data on PCP calculation Every 20 Second..");
@@ -105,34 +108,42 @@ public class PCPIngestionService {
 
 	public void callPcpCalculationToPublishContract() {
 		List<PCPMemberContractEntity> contracts = repository.findByStatus(STATUS.STAGED);
-        log.info("Publish Contract to PCP-Calculation-service....");
-        pcpCalculationClient.publishContractToPcpCalcuationService(contracts);
+		log.info("Publish Contract to PCP-Calculation-service....");
+		pcpCalculationClient.publishContractToPcpCalcuationService(contracts);
 		if (contracts.size() > 0) {
 			contracts.forEach(contract -> {
 				contract.setStatus(STATUS.COMPLETED);
 			});
 			repository.saveAll(contracts);
 		}
-	}    
-
-	public ResponseEntity<Member> fetchPcpmemberFromTibco(String tibcoQueryStr) {
-		return tibcoClient.fetchPcpmemberFromTibco(tibcoQueryStr);
 	}
 
-	public void createPCPContract(final String pcpMembersRequestStr) {
+	public void createPCPContract(String tibcoQueryStr) {
 		log.info("createPCPContract - Tibco Request to create pcp member contract started");
-		ResponseEntity<Member> members = fetchPcpmemberFromTibco(tibcoQueryStr);
-		log.debug("Member Receive {}", members);
-		if (members != null) {
-			List<PCPMemberContractEntity> contract = buildPcpMemberContract(
-					members.getBody().getPcpMembers().getContracts());
-			if (contract.size() > 0) {
-				List<PCPMemberContractEntity> savedContract = repository.saveAll(contract);
-				log.info("Total " + savedContract.size() + " Contract is staged...");
-				// sending to hold contractIds saved in current date
-				this.contractSavedToDate(savedContract);
+		Boolean isMorerecods = Boolean.TRUE;
+		int pagenum = 0;
+		while (isMorerecods) {
+			Map<String,Integer> pageNumMap = new HashMap<>();
+			String tibcoQueryStrRequest = StrSubstitutor.replace(tibcoQueryStr, params);
+			pageNumMap.put("pagenum", pagenum);
+			String paginatedtibcoQueryStr = StrSubstitutor.replace(tibcoQueryStrRequest, pageNumMap);
+			log.info("information ["+ paginatedtibcoQueryStr + "]");
+			ResponseEntity<Member> members = tibcoClient.fetchPcpmemberFromTibco(paginatedtibcoQueryStr);
+			log.debug("Member Receive {}", members);
+			if (members != null && members.getBody() != null && members.getBody().getPcpMembers() != null) {
+				List<PCPMemberContractEntity> contract = buildPcpMemberContract(
+						members.getBody().getPcpMembers().getContracts());
+				if (contract.size() > 0) {
+					List<PCPMemberContractEntity> savedContract = repository.saveAll(contract);
+					log.info("Total " + savedContract.size() + " Contract is staged...");
+					// sending to hold contractIds saved in current date
+					this.contractSavedToDate(savedContract);
+				} else {
+					log.info("There is no contract to save..");
+				}
+				pagenum=pagenum+1;
 			} else {
-				log.info("There is no contract to save..");
+				isMorerecods = Boolean.FALSE;
 			}
 		}
 	}
@@ -149,11 +160,11 @@ public class PCPIngestionService {
 			log.info("Total number of records fetch from second Query " + mbrProvNtwkAssn.size());
 			updateLastMaintanenceDate(mbrProvNtwkAssn);
 		}
-		// @Todo groupNumber,  divisionNumber , numberOfEnrollee is hard code
+		// @Todo List of mtv_Person_ID is empty
 		// they are un-availbale in current query
 		List<PCPMemberContractEntity> memberContract = mbrProvNtwkAssn.stream()
 				.map(contract -> new PCPMemberContractEntity(contract.getContractID(),
-						listsOfMembers(mbrProvNtwkAssn, contract.getContractID()), "123", "123",
+						listsOfMembers(mbrProvNtwkAssn, contract.getContractID()), new ArrayList<>(),
 						convertIntoString(createContractFromMetavenceRecords(contract)), 3, STATUS.STAGED, 0))
 				.distinct().collect(Collectors.toList());
 		if (memberContract.size() > 0) {
@@ -187,10 +198,10 @@ public class PCPIngestionService {
 		List<PCPMemberContractEntity> memberContract = contracts.stream()
 				.filter(contract -> !contractCreatedForTodate.contains(contract.getContractID()))
 				.map(contract -> new PCPMemberContractEntity(contract.getContractID(),
-						listOfEnrollMembers(contract.getEnrollees()), contract.getGroupNumber(),
-						contract.getDivisionNumber(), convertIntoString(contract), contract.getEnrollees().size(),
-						STATUS.STAGED, 0))
+						listOfEnrollMembers(contract.getEnrollees()), new ArrayList<>(), convertIntoString(contract),
+						contract.getEnrollees().size(), STATUS.STAGED, 0))
 				.distinct().collect(Collectors.toList());
+
 		log.debug("buildPcpContractcontract Ends contract are is {}", memberContract);
 		return memberContract;
 	}
@@ -227,7 +238,7 @@ public class PCPIngestionService {
 				.map(mbrProvNtwkAssn -> mbrProvNtwkAssn.getMemberId()).collect(Collectors.toList());
 	}
 
-	public String calculateTime(Date start, Date end) {
+	private String calculateTime(Date start, Date end) {
 		long diff = end.getTime() - start.getTime();
 
 		String TimeTaken = String.format("[%s] hours : [%s] mins : [%s] secs", TimeUnit.MILLISECONDS.toHours(diff),

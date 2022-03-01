@@ -2,7 +2,10 @@ package com.delta.pcpingestion.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
+import java.util.Map;
 
+import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -32,6 +35,7 @@ public class TibcoClient {
 	
 	@Value("${pcp.ingestion.service.basicAuthPassword}")
 	private String basicAuthPassword;
+	
 	
 	@Autowired
 	private RestTemplate restTemplate;

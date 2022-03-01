@@ -96,7 +96,7 @@ public class PCPIngestionServiceTest {
 
 	@Test
 	public void shouldCreateNewPCPMembercontract() throws Exception {
-		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1558}'}";
+		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":0}'}";
 		Member member = new Member();
 		member.setPcpMembers(pcpMember);
 		ResponseEntity<Member> pcpMemberResp = new ResponseEntity<Member>(member, HttpStatus.OK);

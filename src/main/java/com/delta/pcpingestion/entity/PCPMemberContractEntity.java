@@ -54,13 +54,18 @@ public class PCPMemberContractEntity implements java.io.Serializable {
 	@ElementCollection(fetch = FetchType.EAGER)
 	private List<String> memberId;
 	
-	@NonNull
-	@Column(name = "group_number")
-	private String groupNumber;
+//	@NonNull
+//	@Column(name = "group_number")
+//	private String groupNumber;
 	
 	@NonNull
-	@Column(name = "division_number")
-    private String divisionNumber;
+	@Column(name = "mtvPerson_ID")
+	@ElementCollection
+	private List<String> mtvPersonID;
+	
+//	@NonNull
+//	@Column(name = "division_number")
+//    private String divisionNumber;
 
 	@NonNull
 	@Column(name = "contract", length = 80000)
