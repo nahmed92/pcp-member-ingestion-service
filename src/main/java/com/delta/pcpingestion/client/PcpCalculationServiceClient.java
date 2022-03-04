@@ -19,60 +19,118 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.delta.pcpingestion.entity.PCPMemberContractEntity;
+import com.delta.pcpingestion.entity.PCPMemberContract;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
 public class PcpCalculationServiceClient {
-	
+
 	@Value("${pcp.calculation.service.endpoint}")
 	private String pcpCalculationServiceEndpoint;
 
-	@Autowired(required=true)
+	@Autowired(required = true)
 	private RestTemplate restTemplate;
-	
+
 	public ValidateProviderResponse validateProvider() {
 		log.info("Call PCP Calculation Service Validate Provider");
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(pcpCalculationServiceEndpoint+"/validate-provider");
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString(pcpCalculationServiceEndpoint + "/validate-provider");
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		ResponseEntity<ValidateProviderResponse> responseEntity = null;
 		try {
-			responseEntity = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST, 
-					new HttpEntity<>(headers), ValidateProviderResponse.class);
+			responseEntity = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST, new HttpEntity<>(headers),
+					ValidateProviderResponse.class);
 		} catch (RestClientException e) {
-			throw new RuntimeException("Rest Client Exception ["+e.getCause()+"] and Messagge ["+e.getMessage());
+			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		} catch (URISyntaxException e) {
-			throw new RuntimeException("URI Syntax Exception ["+e.getCause()+"] and Messagge ["+e.getMessage());
+			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		}
-			return responseEntity.getBody();
-	
+		return responseEntity != null ? responseEntity.getBody() : null;
+
 	}
-	
-	@Retryable(value = RuntimeException.class ,  maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
-	public void publishContractToPcpCalcuationService(List<PCPMemberContractEntity> contracts) throws RuntimeException{
+
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
+	public void publishContractToPcpCalcuationService(List<PCPMemberContract> contracts) throws RuntimeException {
 		log.info("Call PCP Calculation Service Client.....");
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(pcpCalculationServiceEndpoint+"/process-pcp-member-contract");
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString(pcpCalculationServiceEndpoint + "/process-pcp-member-contract");
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
-			restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST, 
-					new HttpEntity<>(contracts,headers),
-					 new ParameterizedTypeReference<List<PCPMemberContractEntity>>() {});
+			restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST, new HttpEntity<>(contracts, headers),
+					new ParameterizedTypeReference<List<PCPMemberContract>>() {
+					});
 		} catch (RestClientException e) {
-			throw new RuntimeException("Rest Client Exception ["+e.getCause()+"] and Messagge ["+e.getMessage());
+			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		} catch (URISyntaxException e) {
-			throw new RuntimeException("URI Syntax Exception ["+e.getCause()+"] and Messagge ["+e.getMessage());
+			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		}
 
 	}
-	
-    @Recover
-    public void recover(RuntimeException t,List<PCPMemberContractEntity> contracts){
-        log.info("Alert - PCP-Calculation-Service is not responding......");
-    }
+
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
+	public ResponseEntity<ValidateProviderResponse> publishAssignMemberPCP(ValidateProviderRequest validateAssignMember)
+			throws RuntimeException {
+		log.info("Call PCP Calculation Service Client.....");
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString(pcpCalculationServiceEndpoint + "/assign-member-pcp");
+		String uriBuilder = builder.build().encode().toUriString();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		ResponseEntity<ValidateProviderResponse> response = null;
+		try {
+			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,
+					new HttpEntity<>(validateAssignMember, headers), ValidateProviderResponse.class);
+		} catch (RestClientException e) {
+			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
+		}
+		return response;
+	}
+
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
+	public ResponseEntity<MessageResponse> publishAssignMembersPCP(List<ValidateProviderRequest> validateAssignMembers)
+			throws RuntimeException {
+		log.info("Call PCP Calculation Service Client.....");
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString(pcpCalculationServiceEndpoint + "/assign-pcps-to-members");
+		String uriBuilder = builder.build().encode().toUriString();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		ResponseEntity<MessageResponse> response = null;
+		try {
+			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,
+					new HttpEntity<>(validateAssignMembers, headers), MessageResponse.class);
+		} catch (RestClientException e) {
+			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
+		}
+		return response;
+	}
+
+	@Recover
+	public void recover(RuntimeException t, List<PCPMemberContract> contracts) {
+		log.info("Alert - PCP-Calculation-Service is not responding......");
+	}
+
+	@Recover
+	public ResponseEntity<ValidateProviderResponse> recoverPublishAssignMemberPCP(RuntimeException t,
+			ValidateProviderRequest validateProviderRequest) {
+		log.info("Alert - PCP-Calculation-Service is not responding......");
+		return null;
+	}
+
+	@Recover
+	public ResponseEntity<MessageResponse> recoverPublishAssignMembersPCP(RuntimeException t,
+			List<ValidateProviderRequest> validateAssignMembers) {
+		log.info("Alert - PCP-Calculation-Service is not responding......");
+		return null;
+	}
 }

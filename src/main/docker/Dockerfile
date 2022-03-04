@@ -6,8 +6,8 @@ FROM openjdk:11-jre
 
 MAINTAINER Delta Dental Group Member Online - DCM
 VOLUME /tmp
-ADD contrast.jar contrast.jar
 ADD pcp-member-ingestion-service-1.0.0.jar pcp-member-ingestion-service-1.0.0.jar
+ADD contrast.jar contrast.jar
 RUN sh -c 'touch /pcp-member-ingestion-service-1.0.0.jar'
 RUN sh -c 'touch /contrast.jar'
 ENV JAVA_OPTS=""
@@ -15,10 +15,6 @@ ENTRYPOINT java $JAVA_OPTS \
     -javaagent:$APPD_ROOT/javaagent.jar \
     -Dcontrast.dir=/opt/docker/logs/contrast \
 	-Dcontrast.override.appname=${SERVICE_NAME} \
-	-Dpcp.ingestion.service.tibcoPcpMemberUrl=${PCP_INGESTION_SERVICE_TIBCOPCPMEMBERURL}\
-	-Dpcp.ingestion.service.basicAuthUser=${PCP_INGESTION_SERVICE_BASICAUTHUSER}\
-	-Dpcp.ingestion.service.basicAuthPassword=${PCP_INGESTION_SERVICE_BASICAUTHPASSWORD}\
-	-Dpcp.calculation.service.endpoint=${PCP_CALCULATION_SERVICE_ENDPOINT}\
 	-Dcontrast.enabled=${CONTRAST_ENABLED} \
 	-Dcontrast.env=${CONTRAST_ENV} \
 	-Dcontrast.server.name=${CONTRAST_SERVER_NAME} \
@@ -36,21 +32,39 @@ ENTRYPOINT java $JAVA_OPTS \
 	-DplatformLogLevel=${PLATFORM_LOG_LEVEL} \
 	-DsystemLogLevel=${SYSTEM_LOG_LEVEL} \
 	-Dserver.port=${SERVER_PORT} \
-	-Dservice.name=${SERVICE_NAME} \
-	-Dspring.datasource.url=${DATASOURCE_URL} \
-	-Dspring.datasource.username=${DATASOURCE_USERNAME} \
-	-Dspring.datasource.password=${DATASOURCE_PASSWORD} \
-	-Dspring.datasource.driver-class=${DATASOURCE_DRIVER_CLASS} \
+	-Dservice.name=${SERVICE_NAME} \	
+	-Dspring.mssql.datasource.driver-class=${SPRING_MSSQL_DATASOURCE_DRIVE_CLASS} \
+    -Dspring.mssql.datasource.jdbc-url=${SPRING_MSSQL_DATASOURCE_JDBC_URL} \
+    -Dspring.mssql.datasource.username=${SPRING_MSSQL_DATASOURCE_USERNAME} \
+    -Dspring.mssql.datasource.password=${SPRING_MSSQL_DATASOURCE_PASSWORD} \    
+    -Dmetavance.database.jdbcUrl=${METAVANCE_DATABASE_JDBC_URL} \
+    -Dmetavance.database.userName=${METAVANCE_DATABASE_USERNAME} \
+    -Dmetavance.database.password=${METAVANCE_DATABASE_PASSWORD} \
+    -Dmetavance.database.driverClassName=${METAVANCE_DATABASE_DRIVERCLASS_NAME} \
+    -Dmetavance.database.hibernate.dialect=${METAVANCE_DATABASE_HIBERNATE_DIALECT} \    
+    -Dpcp.ingestion.service.tibcoPcpMemberUrl=${PCP_INGESTION_SERVICE_TIBCOPCPMEMBER_URL} \
+    -Dpcp.ingestion.service.basicAuthUser=${PCP_INGESTION_SERVICE_BASIC_AUTH_USER} \
+    -Dpcp.ingestion.service.basicAuthPassword=${PCP_INGESTION_SERVICE_BASIC_AUTH_PASSWORD} \
+    -Dpcp.ingestion.service.isUsedTibco=${PCP_INGESTION_SERVICE_IS_USED_TIBCO} \
+    -Dpcp.ingestion.service.state=${PCP_INGESTION_SERVICE_STATE} \
+    -Dpcp.ingestion.service.isPublishSingleClaim=${PCP_INGESTION_SERVICE_ISPUBLISHSINGLECLAIM}\
+    -Dpcp.calculation.service.endpoint=${PCP_CALCULATION_SERVICE_ENDPOINT}\
+    -Dpcp.tibco.service.retry.maxattempts=${PCP_TIBCO_SERVICE_RETRY_MAXATTEMPTS}\
+    -Dpcp.calculation.service.retry.maxattempts=${PCP_CALCULATION_SERVICE_RETRY_MAXATTEMPTS}\
+    -Djob.pcp.contract.initial.delay=${JOB_PCP_CONTRACT_INITIAL_DELAY} \
+    -Djob.pcp.contract.fixed.delay=${JOB_PCP_CONTRACT_FIXED_DELAY} \
+    -Djob.post.contract.tocalculation.initial.delay=${JOB_POST_CONTRACT_TO_CALCULATON_INITIAL_DELAY} \
+    -Djob.post.contract.tocalculation.fixed.delay=${JOB_POST_CONTRACT_TO_CALCULATON_FIXED_DELAY} \
+    #-Dpcp.members.tibcoquerystr.parammap=${PCP_MEMBERS_TIBCOQUERYSTR_PARAM_MAP} \
     -Dspring.jpa.hibernate.ddl-auto=${JPA_HIBERNATE_DLL_AUTO} \
     -Dspring.jpa.properties.hibernate.format_sql=${JPA_HIBERNATE_FORMAT_SQL} \
     -Dspring.jpa.properties.hibernate.dialect=${JPA_PROPERTIES_DIALECT} \
     -Dspring.jpa.hibernate.c3p0.min.size=${JPA_MIN_SIZE} \
     -Dspring.jpa.hibernate.c3p0.max.size=${JPA_MAX_SIZE} \
     -Dspring.jpa.hibernate.c3p0.timeout=${JPA_TIMEOUT} \
-    -Dspring.datasource.driverClassName=${DATASOURCE_DRIVER_CLASS} \
+    -Dservice.cert.file=${DD_KEYSTORE_FILE} \
+	-Dservice.cert.password=${DD_KEYSTORE_PASSWORD} \
     -Dspring.jpa.hibernate.naming.implicit-strategy=${JPA_NAMING_IMPLICIT_STRATEGY} \
     -Dspring.jpa.hibernate.naming.physical-strategy=${JPA_NAMING_PHYSICAL_STRATEGY} \
     -Denvironment=${ENVIRONMENT} \
-    -Dserver.monitor.file=${SERVICE_MONITOR_FILE} \
-    -Djava.security.egd=file:/dev/./urandom \
     -jar /pcp-member-ingestion-service-1.0.0.jar

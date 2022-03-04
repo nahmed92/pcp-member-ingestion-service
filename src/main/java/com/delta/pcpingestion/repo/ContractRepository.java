@@ -3,8 +3,9 @@ package com.delta.pcpingestion.repo;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import com.delta.pcpingestion.entity.PCPMemberContractEntity;
+import com.delta.pcpingestion.entity.PCPMemberContract;
 import com.delta.pcpingestion.service.STATUS;
 
 /**
@@ -14,8 +15,9 @@ import com.delta.pcpingestion.service.STATUS;
  * @author ca94197
  * @since 1.0
  */
-public interface ContractRepository extends JpaRepository<PCPMemberContractEntity, String> {
+@Repository
+public interface ContractRepository extends JpaRepository<PCPMemberContract, String> {
 
-    List<PCPMemberContractEntity> findByStatus(STATUS status);
+    List<PCPMemberContract> findByStatus(STATUS status);
 
 }

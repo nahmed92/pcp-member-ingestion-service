@@ -2,10 +2,7 @@ package com.delta.pcpingestion.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.MessageFormat;
-import java.util.Map;
 
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -29,18 +26,17 @@ public class TibcoClient {
 
 	@Value("${pcp.ingestion.service.tibcoPcpMemberUrl}")
 	private String tibcoPcpMemberUrl;
-	
+
 	@Value("${pcp.ingestion.service.basicAuthUser}")
 	private String basicAuthUser;
-	
+
 	@Value("${pcp.ingestion.service.basicAuthPassword}")
 	private String basicAuthPassword;
-	
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
-	
-	@Retryable(value = RuntimeException.class ,  maxAttemptsExpression = "${pcp.tibco.service.retry.maxattempts:3}")
+
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.tibco.service.retry.maxattempts:3}")
 	public ResponseEntity<Member> fetchPcpmemberFromTibco(String tibcoQueryStr) {
 		log.info("Tibco Client Call to get records......");
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(tibcoPcpMemberUrl);
@@ -58,10 +54,10 @@ public class TibcoClient {
 		}
 		return response;
 	}
-	
-    @Recover
-    public ResponseEntity<Member> recover(RuntimeException t, String tibcoQueryStr){
-        log.info("Alert - Tibco Service is not responding......");
-        return null;
-    }
+
+	@Recover
+	public ResponseEntity<Member> recover(RuntimeException t, String tibcoQueryStr) {
+		log.info("Alert - Tibco Service is not responding......");
+		return null;
+	}
 }

@@ -1,5 +1,6 @@
 package com.delta.pcpingestion.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,8 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author ca94197
  *
  */
-public class PcpIngestionControllerTest extends AbstractRestIntegrationTest{
-	
+public class PcpIngestionControllerTest extends AbstractRestIntegrationTest {
+
 	@Mock
 	private ContractRepository repo;
 
@@ -36,22 +37,29 @@ public class PcpIngestionControllerTest extends AbstractRestIntegrationTest{
 
 	@MockBean
 	private PCPIngestionService service;
- 
+
 	@InjectMocks
 	private PcpIngestionController controller;
-	
+
 	@Test
-	public void shouldCreateNewPCPMembercontract() throws Exception {
+	public void testCreateNewPCPMembercontract() throws Exception {
 		PCPMembersRequest member = new PCPMembersRequest();
-		member.setTibcoQueryStr("{\r\n" + "    'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1553}'\r\n" + "}");
+		member.setTibcoQueryStr(
+				"{\r\n" + "    'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1553}'\r\n" + "}");
 		mockMvc.perform(post("/pcpmembers/contract/create") //
 				.contentType(MediaType.APPLICATION_JSON) //
 				.content(objectMapper.writeValueAsString(member))) //
 				.andExpect(status().isCreated());
-	 }
+	}
 
 	@Test
-	public void shouldReturnBadRequestWhenPayloadisNull() throws Exception {
+	public void testFindAllCntract() throws Exception {
+		mockMvc.perform(get("/pcpmembers/contract/findAll")) //
+				.andExpect(status().isOk()); //
+	}
+
+	@Test
+	public void testReturnBadRequestWhenPayloadisNull() throws Exception {
 		mockMvc.perform(post("/pcpmembers/contract/create") //
 				.contentType(MediaType.APPLICATION_JSON) //
 				.content("")) //
@@ -59,7 +67,7 @@ public class PcpIngestionControllerTest extends AbstractRestIntegrationTest{
 	}
 
 	@Test
-	public void shouldReturnRequestNotFoundWhenURLIsNotCorrect() throws Exception {
+	public void testReturnRequestNotFoundWhenURLIsNotCorrect() throws Exception {
 		mockMvc.perform(post("/pcp/contract") //
 				.contentType(MediaType.APPLICATION_JSON) //
 				.content("{\r\n" + "    'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1553}'\r\n" + "}")) //

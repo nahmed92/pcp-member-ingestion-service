@@ -95,7 +95,7 @@ pipeline {
 				script {
 
 					 gitTagging("${SERVICE}_${BRANCH_NAME}_${BUILD_NUMBER}","Development/dd_cx_docker-dev")
-					 gitTagging("${SERVICE}_${BRANCH_NAME}_${BUILD_NUMBER}","development-private/dd_cx_docker-dev")
+					 gitTagging("${SERVICE}_${BRANCH_NAME}_${BUILD_NUMBER}","Development-private/dd_cx_docker-dev")
 				     rundeckLibrary.deployJob()
                     }
 			}

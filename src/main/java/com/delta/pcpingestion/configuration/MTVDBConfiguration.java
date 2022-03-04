@@ -54,8 +54,7 @@ public class MTVDBConfiguration {
 				env.getProperty("spring.jpa.show-sql"));
 		properties.setProperty("spring.jpa.properties.hibernate.format_sql", 
 				env.getProperty("spring.jpa.properties.hibernate.format_sql"));
-		properties.setProperty("spring.jpa.properties.hibernate.jdbc.batch_size", 
-				env.getProperty("spring.jpa.properties.hibernate.jdbc.batch_size"));
+		properties.setProperty("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation", "true");
 		LocalContainerEntityManagerFactoryBean emf = builder.dataSource(dataSource)
 				.packages("com.delta.pcpingestion.mtv.entities").persistenceUnit("mtvPU").build();
 		emf.setJpaProperties(properties);

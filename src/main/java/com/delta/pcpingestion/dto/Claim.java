@@ -26,4 +26,10 @@ public class Claim {
 	private String emergencyFlag;
 
 	private String encounterFlag;
+	
+	private String claimStatus;
+	
+	private String stateCode;
+	
+	private String securityGroupId;
 }

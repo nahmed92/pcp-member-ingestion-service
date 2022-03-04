@@ -2,24 +2,40 @@ package com.delta.pcpingestion.entity;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.transaction.Transactional;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import com.delta.pcpingestion.service.Claim;
 import com.delta.pcpingestion.service.STATUS;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 
 /**
  * Contract Entity Class
@@ -28,12 +44,18 @@ import lombok.RequiredArgsConstructor;
  * @since 1.0
  */
 @Data
+@Builder
 @Entity
-@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = PCPMemberContractEntity.TABLE_NAME,  schema = "dbo")
+@EqualsAndHashCode
+@Transactional
+@Table(name = PCPMemberContract.TABLE_NAME,  schema = "dbo")
 @EnableJpaAuditing
-public class PCPMemberContractEntity implements java.io.Serializable {
+public class PCPMemberContract implements java.io.Serializable {
 
 	/**
 	 * Serialization Key
@@ -52,21 +74,19 @@ public class PCPMemberContractEntity implements java.io.Serializable {
 	@NonNull
 	@Column(name = "member_Id")
 	@ElementCollection(fetch = FetchType.EAGER)
-	private List<String> memberId;
-	
-//	@NonNull
-//	@Column(name = "group_number")
-//	private String groupNumber;
+	@CollectionTable(name="contract_memberId")
+	private Set<String> memberId;
 	
 	@NonNull
 	@Column(name = "mtvPerson_ID")
-	@ElementCollection
-	private List<String> mtvPersonID;
-	
-//	@NonNull
-//	@Column(name = "division_number")
-//    private String divisionNumber;
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name="contract_mtvPersonID")
+	private Set<String> mtvPersonID;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name="contract_claim")
+	private Set<Claim> claim;
+	 
 	@NonNull
 	@Column(name = "contract", length = 80000)
 	private String contract;
