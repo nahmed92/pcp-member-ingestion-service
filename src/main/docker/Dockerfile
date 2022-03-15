@@ -47,8 +47,10 @@ ENTRYPOINT java $JAVA_OPTS \
     -Dpcp.ingestion.service.basicAuthPassword=${PCP_INGESTION_SERVICE_BASIC_AUTH_PASSWORD} \
     -Dpcp.ingestion.service.isUsedTibco=${PCP_INGESTION_SERVICE_IS_USED_TIBCO} \
     -Dpcp.ingestion.service.state=${PCP_INGESTION_SERVICE_STATE} \
-    -Dpcp.ingestion.service.isPublishSingleClaim=${PCP_INGESTION_SERVICE_ISPUBLISHSINGLECLAIM}\
-    -Dpcp.calculation.service.endpoint=${PCP_CALCULATION_SERVICE_ENDPOINT}\
+    -Dpcp.ingestion.service.numOfDays=${PCP_INGESTION_SERVICE_NUMOFDAYS} \
+    -Dpcp.ingestion.service.isPublishSingleClaim=${PCP_INGESTION_SERVICE_ISPUBLISHSINGLECLAIM} \
+    -Dpcp.calculation.service.endpoint=${PCP_CALCULATION_SERVICE_ENDPOINT} \
+    -Dpcp.config.service.endpoint=${PCP_CONFIG_SERVICE_ENDPOINT} \
     -Dpcp.tibco.service.retry.maxattempts=${PCP_TIBCO_SERVICE_RETRY_MAXATTEMPTS}\
     -Dpcp.calculation.service.retry.maxattempts=${PCP_CALCULATION_SERVICE_RETRY_MAXATTEMPTS}\
     -Djob.pcp.contract.initial.delay=${JOB_PCP_CONTRACT_INITIAL_DELAY} \

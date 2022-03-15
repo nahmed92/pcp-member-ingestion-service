@@ -1,6 +1,12 @@
 package com.delta.pcpingestion.dto;
 
+import java.sql.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Claim Class
@@ -9,6 +15,8 @@ import lombok.Data;
  * @since 1.0
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Claim {
 
 	private String claimId;
@@ -17,9 +25,11 @@ public class Claim {
 
 	private String billProviderSpeciality;
 
-	private String receivedDate;
+	@JsonFormat(pattern="dd-MMM-yy")
+	private Date receivedDate;
 
-	private String resolvedDate;
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date resolvedDate;
 
 	private String serviceNumber;
 

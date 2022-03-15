@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.delta.pcpingestion.client.PCPConfigServiceClient;
 import com.delta.pcpingestion.client.TibcoClient;
 import com.delta.pcpingestion.dto.Claim;
 import com.delta.pcpingestion.dto.Contract;
@@ -51,6 +53,9 @@ public class PCPIngestionServiceTest {
 
 	@Mock
 	private TibcoClient tibcoRestTemplate;
+	
+	@Mock
+	private PCPConfigServiceClient configClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -68,13 +73,13 @@ public class PCPIngestionServiceTest {
 		claim.setClaimId("1");
 		claim.setBillingProviderId("GRP782411662");
 		claim.setBillProviderSpeciality("GRP782411661");
-		claim.setReceivedDate("2017-09-28 00:00:01.000000");
+		//claim.setReceivedDate(new Date("2017-09-28 00:00:01.000000"));
 
 		Claim claim1 = new Claim();
 		claim1.setClaimId("12");
 		claim1.setBillingProviderId("GRP782411661");
 		claim1.setBillProviderSpeciality("GRP782411661");
-		claim1.setReceivedDate("2017-09-28 00:00:01.000000");
+		//claim1.setReceivedDate(LocalDate.from("2017-09-28 00:00:01.000000"));
 
 		MemberAddress memberAddress = new MemberAddress();
 		memberAddress.setAddressLine1("La Mirag");
@@ -144,6 +149,7 @@ public class PCPIngestionServiceTest {
 		when(tibcoRestTemplate
 				.fetchPcpmemberFromTibco( "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":0}'}"))
 						.thenReturn(pcpMemberResp);
+		when(configClient.providerLookBackDays()).thenReturn("60");
 		pcpIngestionService.createPCPContract(tibcoQuery);
 
 	}

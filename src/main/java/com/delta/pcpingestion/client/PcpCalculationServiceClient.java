@@ -78,7 +78,7 @@ public class PcpCalculationServiceClient {
 			throws RuntimeException {
 		log.info("Call PCP Calculation Service Client.....");
 		UriComponentsBuilder builder = UriComponentsBuilder
-				.fromUriString(pcpCalculationServiceEndpoint + "/assign-member-pcp");
+				.fromUriString(pcpCalculationServiceEndpoint + "/member-contract-claim");
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -99,7 +99,7 @@ public class PcpCalculationServiceClient {
 			throws RuntimeException {
 		log.info("Call PCP Calculation Service Client.....");
 		UriComponentsBuilder builder = UriComponentsBuilder
-				.fromUriString(pcpCalculationServiceEndpoint + "/assign-pcps-to-members");
+				.fromUriString(pcpCalculationServiceEndpoint + "/members-contracts-and-claims");
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

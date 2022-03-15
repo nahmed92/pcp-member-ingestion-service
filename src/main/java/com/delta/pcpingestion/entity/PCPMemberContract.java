@@ -4,26 +4,19 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.transaction.Transactional;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import com.delta.pcpingestion.service.Claim;
 import com.delta.pcpingestion.service.STATUS;
 
 import lombok.AllArgsConstructor;
@@ -85,7 +78,7 @@ public class PCPMemberContract implements java.io.Serializable {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="contract_claim")
-	private Set<Claim> claim;
+	private List<Claim> claim;
 	 
 	@NonNull
 	@Column(name = "contract", length = 80000)
@@ -103,7 +96,7 @@ public class PCPMemberContract implements java.io.Serializable {
 	@Column(name = "num_of_attempt")
 	private Integer numOfAttempt;
 
-	@Column(name = "created_date")
+	@Column(name= "created_date", updatable = false)
 	@CreationTimestamp
 	private Timestamp createdDate;
 

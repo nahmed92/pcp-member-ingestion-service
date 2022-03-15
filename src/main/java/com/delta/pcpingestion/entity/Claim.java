@@ -1,11 +1,14 @@
-package com.delta.pcpingestion.service;
+package com.delta.pcpingestion.entity;
 
-import javax.persistence.Column;
+
+import java.sql.Date;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.transaction.Transactional;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,17 +29,19 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Table(name="Claim")
 @Embeddable
-public class Claim {
-	
+public class Claim {// implements Comparable<Claim>{
+
 	private String claimId;
 
 	private String billingProviderId;
 
 	private String billProviderSpeciality;
 
-	private String receivedDate;
-	
-	private String resolvedDate;
+	@JsonFormat(pattern="dd-MMM-yy")
+	private Date receivedDate;
+
+	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	private Date resolvedDate;
 
 	private String serviceNumber;
 	
@@ -49,4 +54,12 @@ public class Claim {
 	private String stateCode;
 	
 	private String securityGroupId;
+	
+//	 @Override
+//	  public int compareTo(Claim claim) {
+//	    if (this.getReceivedDate() == null || claim.getReceivedDate() == null)
+//	      return 0;
+//	    return claim.getReceivedDate().compareTo(this.getReceivedDate());
+//	  }
+	
 }

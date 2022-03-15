@@ -19,5 +19,6 @@ public class ValidateProviderRequest {
 	private String contractId;
 	private String memberId;
 	private String providerId;
+	private String operatorId;
 	private String state;
 }
