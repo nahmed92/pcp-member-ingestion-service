@@ -95,8 +95,7 @@ public class PCPIngestionService {
 		}
 	}
 
-//	@Scheduled(initialDelayString = "${job.post.contract.tocalculation.initial.delay}", fixedRateString = "${job.post.contract.tocalculation.fixed.delay}")
-	@Scheduled(initialDelayString = "1800000", fixedRateString = "1800000")
+	@Scheduled(initialDelayString = "${job.post.contract.tocalculation.initial.delay}", fixedRateString = "${job.post.contract.tocalculation.fixed.delay}")
 	@MethodExecutionTime
 	public void schedulePostContractDataOnPCPCalculationFixedRateTask() {
 		log.info("Schedular Call for Posting Data on PCP calculation.....");
@@ -118,7 +117,7 @@ public class PCPIngestionService {
 
 	public void createPCPContract(String tibcoQueryStr) {
 		log.info("createPCPContract - Tibco Request to create pcp member contract started");
-		ExecutorService executor = Executors.newFixedThreadPool(6);
+		ExecutorService executor = Executors.newFixedThreadPool(8);
 		String lookbackDays = configClient.providerLookBackDays();
 		LocalDate cutOffDate = LocalDate.now().minusDays(Integer.parseInt(lookbackDays));
 
@@ -131,13 +130,13 @@ public class PCPIngestionService {
 		log.info("createPCPContract - PCP Ingestion Service Process Complete...");
 	}
 
-	@Async
 	private void publishSingleClaimToPcpCalculationService() {
-		ExecutorService executor = Executors.newFixedThreadPool(4);
+		ExecutorService executorforClaim = Executors.newFixedThreadPool(8);
 		for (State state : State.values()) {
-			executor.submit(() -> {
+			executorforClaim.submit(() -> {
 				List<PCPMemberContract> contracts = repository.findByStatusAndStateCode(STATUS.STAGED.ordinal(),
 						state.toString());
+				log.info("Start Publish {} contract records for state {}....", contracts.size(), state);
 				if (!contracts.isEmpty()) {
 					contracts.stream().forEach(contract -> {
 						contract.getClaim().stream().forEach(claim -> {
@@ -160,15 +159,16 @@ public class PCPIngestionService {
 				}
 			});
 		}
-		executor.shutdown();
+		executorforClaim.shutdown();
 	}
 
 	private void publishClaimsToPcpCalculationService() {
-		ExecutorService executor = Executors.newFixedThreadPool(4);
+		ExecutorService executorforClaims = Executors.newFixedThreadPool(8);
 		for (State state : State.values()) {
+			log.info("Start Publish records for state {}....", state);
 			List<PCPMemberContract> contracts = repository.findByStatusAndStateCode(STATUS.STAGED.ordinal(),
 					state.toString());
-			executor.submit(() -> {
+			executorforClaims.submit(() -> {
 				if (!contracts.isEmpty()) {
 					List<ValidateProviderRequest> request = new ArrayList<>();
 					contracts.stream().forEach(contract -> {
@@ -194,7 +194,7 @@ public class PCPIngestionService {
 				}
 			});
 		}
-		executor.shutdown();
+		executorforClaims.shutdown();
 	}
 
 	private void createContractBymetavance(String state) {
