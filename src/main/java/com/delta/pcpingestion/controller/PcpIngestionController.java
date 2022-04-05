@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.delta.pcpingestion.entity.PCPMemberContract;
 import com.delta.pcpingestion.service.PCPIngestionService;
+import com.delta.pcpingestion.service.PCPIngestionServiceSchedular;
 import com.deltadental.platform.common.exception.ServiceError;
 import com.deltadental.platform.common.exception.ServiceException;
 
@@ -40,40 +41,41 @@ public class PcpIngestionController {
 	@Autowired
 	private PCPIngestionService service;
 
+	@Autowired
+	private PCPIngestionServiceSchedular pcpIngestionServiceSchedular;
+
 	@ApiOperation(value = "Create PCP Member contract")
 	@ApiResponses({ @ApiResponse(code = 201, message = "Successfully Create PCP Member Contract"),
 			@ApiResponse(code = 400, message = "Bad Request", response = ServiceError.class),
-			@ApiResponse(code = 500, message = "Internal Server error", response = ServiceError.class) 
-	})
+			@ApiResponse(code = 500, message = "Internal Server error", response = ServiceError.class) })
 	@PostMapping("/create")
-	public ResponseEntity<Object> create(@RequestBody final PCPMembersRequest pcpMembersRequest) 
-			throws ServiceException{
+	public ResponseEntity<Object> create(@RequestBody final PCPMembersRequest pcpMembersRequest)
+			throws ServiceException {
 		log.info("PCPMembersRequest received to create {}", pcpMembersRequest);
-		service.createPCPContract(pcpMembersRequest.getTibcoQueryStr());
+		service.createPCPContract();
 		log.info("PCP member contract is created...");
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-	
+
 	@ApiOperation(value = "Get All PCP Member contract", response = PCPMemberContract.class)
-	@ApiResponses({ @ApiResponse(code = 200, message = "Successfully Get PCP Member Contract",
-	              response = PCPMemberContract[].class),
+	@ApiResponses({
+			@ApiResponse(code = 200, message = "Successfully Get PCP Member Contract", response = PCPMemberContract[].class),
 			@ApiResponse(code = 400, message = "Bad Request", response = ServiceError.class),
 			@ApiResponse(code = 500, message = "Internal Server error", response = ServiceError.class) })
 	@GetMapping("/findAll")
-	public ResponseEntity<List<PCPMemberContract>> findAllContract()  throws ServiceException{
+	public ResponseEntity<List<PCPMemberContract>> findAllContract() throws ServiceException {
 		log.info("Find All PCP Contract");
 		List<PCPMemberContract> contracts = service.getAllContract();
-		return new ResponseEntity<List<PCPMemberContract>>(contracts,HttpStatus.OK);
+		return new ResponseEntity<List<PCPMemberContract>>(contracts, HttpStatus.OK);
 	}
-	
-    
-    @ApiResponses({ @ApiResponse(code = 200, message = "Successfully Enable Disabled Tibco Service Call"),
-        @ApiResponse(code = 400, message = "Bad request.", response = ServiceError.class),
-        @ApiResponse(code = 404, message = "Unable validate provider.", response = ServiceError.class),
-        @ApiResponse(code = 500, message = "Internal server error.", response = ServiceError.class) })
-		@GetMapping(value = "/enableDisbaleTibcoServiceCall", produces = {MediaType.APPLICATION_JSON_VALUE})
-		public void enableDisableTibcoService(@RequestParam("isUsedTibco") Boolean isUsedTibco) {
-		service.enableDisbaleTibcoServiceCall(isUsedTibco);
-     }
-    
+
+	@ApiResponses({ @ApiResponse(code = 200, message = "Successfully Enable Disabled Tibco Service Call"),
+			@ApiResponse(code = 400, message = "Bad request.", response = ServiceError.class),
+			@ApiResponse(code = 404, message = "Unable validate provider.", response = ServiceError.class),
+			@ApiResponse(code = 500, message = "Internal server error.", response = ServiceError.class) })
+	@GetMapping(value = "/enableDisbaleTibcoServiceCall", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public void enableDisableTibcoService(@RequestParam("isUsedTibco") Boolean isUsedTibco) {
+		pcpIngestionServiceSchedular.enableDisbaleTibcoServiceCall(isUsedTibco);
+	}
+
 }

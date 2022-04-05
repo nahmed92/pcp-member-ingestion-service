@@ -1,11 +1,8 @@
 package com.delta.pcpingestion.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -45,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableAutoConfiguration
 @TestInstance(Lifecycle.PER_CLASS)
 @DisplayName("When Testing PCP Member Ingestion Service Impl")
+@Configuration
 @Slf4j
 public class PCPIngestionServiceTest {
 
@@ -53,12 +52,12 @@ public class PCPIngestionServiceTest {
 
 	@Mock
 	private TibcoClient tibcoRestTemplate;
-	
+
 	@Mock
 	private PCPConfigServiceClient configClient;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@InjectMocks
 	private PCPIngestionService pcpIngestionService;
@@ -67,19 +66,20 @@ public class PCPIngestionServiceTest {
 
 	@BeforeEach
 	public void before() {
-	ReflectionTestUtils.setField(pcpIngestionService, "objectMapper", objectMapper);	
+		ReflectionTestUtils.setField(pcpIngestionService, "objectMapper", objectMapper);
+		ReflectionTestUtils.setField(pcpIngestionService, "pcpIngestionProcessWorkersCount", 8);
 		pcpMember = new PcpMember();
 		Claim claim = new Claim();
 		claim.setClaimId("1");
 		claim.setBillingProviderId("GRP782411662");
 		claim.setBillProviderSpeciality("GRP782411661");
-		//claim.setReceivedDate(new Date("2017-09-28 00:00:01.000000"));
+		// claim.setReceivedDate(new Date("2017-09-28 00:00:01.000000"));
 
 		Claim claim1 = new Claim();
 		claim1.setClaimId("12");
 		claim1.setBillingProviderId("GRP782411661");
 		claim1.setBillProviderSpeciality("GRP782411661");
-		//claim1.setReceivedDate(LocalDate.from("2017-09-28 00:00:01.000000"));
+		// claim1.setReceivedDate(LocalDate.from("2017-09-28 00:00:01.000000"));
 
 		MemberAddress memberAddress = new MemberAddress();
 		memberAddress.setAddressLine1("La Mirag");
@@ -98,23 +98,18 @@ public class PCPIngestionServiceTest {
 		contract.setEnrollees(Lists.newArrayList(enrollee));
 
 		pcpMember.setContracts(Lists.newArrayList(contract));
-		
+
 	}
-	
+
 	@Test
 	public void testGetAllContract() throws Exception {
 		Set<String> ids = new HashSet<>();
 		ids.add("1234");
 		ids.add("432");
-		PCPMemberContract entity = PCPMemberContract.builder()
-				.contract("{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
-				.contractID("123")
-				.memberId(ids)
-				.mtvPersonID(ids)
-				.status(STATUS.STAGED)
-				.numberOfEnrollee(3)
-				.numOfAttempt(0)
-				.build();
+		PCPMemberContract entity = PCPMemberContract.builder().contract(
+				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
+				.contractID("123").memberId(ids).mtvPersonID(ids).status(STATUS.STAGED).numberOfEnrollee(3)
+				.numOfAttempt(0).build();
 		List<PCPMemberContract> list = new ArrayList<>();
 		list.add(entity);
 		when(repository.findAll()).thenReturn(list);
@@ -124,34 +119,29 @@ public class PCPIngestionServiceTest {
 		assertEquals(response.get(0).getMemberId().size(), 2);
 		assertEquals(response.get(0).getMtvPersonID().size(), 2);
 		assertEquals(response.get(0).getStatus(), STATUS.STAGED);
-   }
+	}
 
 	@Test
 	public void testCreateNewPCPMembercontract() throws Exception {
 		Set<String> ids = new HashSet<>();
 		ids.add("1234");
 		ids.add("432");
-		PCPMemberContract entity = PCPMemberContract.builder()
-				.contract("{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
-				.contractID("123")
-				.memberId(ids)
-				.mtvPersonID(ids)
-				.status(STATUS.STAGED)
-				.numberOfEnrollee(3)
-				.numOfAttempt(0)
-				.build();
+		PCPMemberContract entity = PCPMemberContract.builder().contract(
+				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
+				.contractID("123").memberId(ids).mtvPersonID(ids).status(STATUS.STAGED).numberOfEnrollee(3)
+				.numOfAttempt(0).build();
 		List<PCPMemberContract> list = new ArrayList<>();
 		list.add(entity);
 		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":${pagenum}}'}";
 		Member member = new Member();
 		member.setPcpMembers(pcpMember);
 		ResponseEntity<Member> pcpMemberResp = new ResponseEntity<Member>(member, HttpStatus.OK);
-		when(tibcoRestTemplate
-				.fetchPcpmemberFromTibco( "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":0}'}"))
+		when(tibcoRestTemplate.fetchPcpmemberFromTibco(
+				"{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":0}'}"))
 						.thenReturn(pcpMemberResp);
 		when(configClient.providerLookBackDays()).thenReturn("60");
-		pcpIngestionService.createPCPContract(tibcoQuery);
+		pcpIngestionService.createPCPContract();
 
 	}
-	
+
 }

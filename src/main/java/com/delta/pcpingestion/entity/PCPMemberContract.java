@@ -78,7 +78,7 @@ public class PCPMemberContract implements java.io.Serializable {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="contract_claim")
-	private List<Claim> claim;
+	private Set<Claim> claim;
 	 
 	@NonNull
 	@Column(name = "contract", length = 80000)

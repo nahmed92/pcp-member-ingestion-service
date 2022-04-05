@@ -1,10 +1,10 @@
 package com.delta.pcpingestion.service;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.delta.pcpingestion.client.TibcoClient;
@@ -23,8 +24,10 @@ import com.delta.pcpingestion.dto.Contract;
 import com.delta.pcpingestion.dto.Enrollee;
 import com.delta.pcpingestion.dto.Member;
 import com.delta.pcpingestion.entity.Claim;
+import com.delta.pcpingestion.entity.PCPIngestionActivity;
 import com.delta.pcpingestion.entity.PCPMemberContract;
 import com.delta.pcpingestion.repo.ContractRepository;
+import com.delta.pcpingestion.repo.PCPIngestionActivityRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,40 +47,54 @@ public class PcpMemberContractCreateProcessor {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	private PCPIngestionActivityRepository pcpIngestionActivityRepository;
+
 	private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
-
-	@Value("${pcp.ingestion.service.numOfDays:10}")
-	private Integer numOfDays;
-
-	Date lastRecivedDate = null;
 
 	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MMM-yy");
 
-	public long createProcessorByState(State state, LocalDate cutOffDate) {
+	public void createProcessorByState(State state, LocalDate cutOffDate, Integer numOfDays) {
 		long startTime = System.currentTimeMillis();
 		Map<String, String> params = new HashMap<>();
 		List<PCPMemberContract> contracts = null;
 		LocalDate processDate = LocalDate.now();
 		log.info("Start process for [" + state + "] for cutOffDate[" + cutOffDate + "]");
+		PCPIngestionActivity activity = new PCPIngestionActivity();
 		while (cutOffDate.isBefore(processDate)) {
 			params.put("state", "\"" + state.toString() + "\"");
 			params.put("numofdays", numOfDays.toString());
 			params.put("receiveddate", processDate.format(df).toString());
 			contracts = createPcpMemberContract(state, params);
 			processDate = processDate.minusDays(numOfDays);
+			logContractActivityReceivedFromTibco(state, activity, contracts);
 		}
-
 		long endTime = System.currentTimeMillis();
 		long seconds = TimeUnit.MILLISECONDS.toSeconds((endTime - startTime));
-		System.out.println(" Thread Name : " + Thread.currentThread().getName() + " taken to complete process : "
-				+ seconds + "second[s]");
-		return seconds;
+		log.info(" Thread Name : {} taken to complete process : {} second[s]", Thread.currentThread().getName(),
+				seconds);
+		if (activity != null && activity.getState() != null) {
+			activity.setTibcoDataStagePeriod(seconds);
+			pcpIngestionActivityRepository.save(activity);
+		}
+	}
+
+	private void logContractActivityReceivedFromTibco(State state, PCPIngestionActivity activity,
+			List<PCPMemberContract> contracts) {
+		if (contracts != null && !contracts.isEmpty()) {
+			int numOfContract = activity.getNumOfContract() + contracts.size();
+			int numOfClaim = activity.getNumOfClaims() + totalClaimInContract(contracts);
+			activity.setNumOfContract(numOfContract);
+			activity.setNumOfClaims(numOfClaim);
+			activity.setNumClaimSendToCalculation(0);
+			activity.setState(state.toString());
+		}
 	}
 
 	private List<PCPMemberContract> createPcpMemberContract(State state, Map<String, String> params) {
 		int pagenum = 0;
 		Boolean isMorerecods = Boolean.TRUE;
-		List<PCPMemberContract> contract = null;
+		List<PCPMemberContract> contracts = new ArrayList<>();
 		while (isMorerecods) {
 			Map<String, Integer> pageNumMap = new HashMap<>();
 			String tibcoQueryStrRequest = StrSubstitutor.replace(tibcoQueryStr, params);
@@ -87,10 +104,12 @@ public class PcpMemberContractCreateProcessor {
 			ResponseEntity<Member> members = tibcoClient.fetchPcpmemberFromTibco(paginatedtibcoQueryStr);
 			log.debug("Member Receive {}", members);
 			if (members != null && members.getBody() != null && members.getBody().getPcpMembers() != null) {
-				contract = buildPcpMemberContract(members.getBody().getPcpMembers().getContracts());
+				List<PCPMemberContract> contract = buildPcpMemberContract(
+						members.getBody().getPcpMembers().getContracts());
 				if (contract.size() > 0) {
 					List<PCPMemberContract> savedContract = repository.saveAll(contract);
 					log.info("Total " + savedContract.size() + " Contract is staged...");
+					contracts.addAll(savedContract);
 				} else {
 					log.info("There is no contract to save..");
 				}
@@ -99,8 +118,7 @@ public class PcpMemberContractCreateProcessor {
 				isMorerecods = Boolean.FALSE;
 			}
 		}
-		return contract;
-
+		return contracts;
 	}
 
 	private List<PCPMemberContract> buildPcpMemberContract(final List<Contract> contracts) {
@@ -118,7 +136,6 @@ public class PcpMemberContractCreateProcessor {
 						.numOfAttempt(0) //
 						.build())
 				.collect(Collectors.toList());
-
 		log.debug("buildPcpContractcontract Ends contract are is {}", memberContract);
 		return memberContract;
 	}
@@ -151,8 +168,8 @@ public class PcpMemberContractCreateProcessor {
 		return contractStr;
 	}
 
-	private List<Claim> listOfEnrollClaims(List<Enrollee> enrolles) {
-		List<Claim> claims = new ArrayList<>();
+	private Set<Claim> listOfEnrollClaims(List<Enrollee> enrolles) {
+		Set<Claim> claims = new HashSet<>();
 		enrolles.stream().forEach(enrollee -> {
 			enrollee.getClaims().stream().forEach(claim -> {
 				Claim claimObj = Claim.builder(). //
@@ -170,10 +187,15 @@ public class PcpMemberContractCreateProcessor {
 						.build();
 				claims.add(claimObj);
 			});
-
 		});
 
 		return claims;
 	}
 
+	private Integer totalClaimInContract(List<PCPMemberContract> contracts) {
+		Integer claimCount = contracts.stream().map(c -> c.getClaim() == null ? 0 : c.getClaim().size()).reduce(0,
+				Integer::sum);
+		return claimCount;
+
+	}
 }

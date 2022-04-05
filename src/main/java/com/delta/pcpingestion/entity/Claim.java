@@ -29,7 +29,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @Table(name="Claim")
 @Embeddable
-public class Claim {// implements Comparable<Claim>{
+public class Claim {
 
 	private String claimId;
 
@@ -55,11 +55,5 @@ public class Claim {// implements Comparable<Claim>{
 	
 	private String securityGroupId;
 	
-//	 @Override
-//	  public int compareTo(Claim claim) {
-//	    if (this.getReceivedDate() == null || claim.getReceivedDate() == null)
-//	      return 0;
-//	    return claim.getReceivedDate().compareTo(this.getReceivedDate());
-//	  }
 	
 }

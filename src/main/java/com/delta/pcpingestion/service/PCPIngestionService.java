@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +29,7 @@ import com.delta.pcpingestion.entity.PCPMemberContract;
 import com.delta.pcpingestion.mtv.entities.MbrProvNtwkAssn;
 import com.delta.pcpingestion.mtv.repo.MetavanceRepo;
 import com.delta.pcpingestion.repo.ContractRepository;
-import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
+import com.delta.pcpingestion.repo.PCPIngestionActivityRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,6 +51,9 @@ public class PCPIngestionService {
 	private ContractRepository repository;
 
 	@Autowired
+	private PCPIngestionActivityRepository pcpIngestionActivityRepository;
+
+	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
@@ -69,76 +71,39 @@ public class PCPIngestionService {
 	@Value("${metavance.pcp.ingestion.service.last_maintanence_time_stamp:null}")
 	private String last_maintanence_time_stamp = null;
 
-	@Value("${pcp.ingestion.service.numOfDays:30}")
-	private String numOfDays;
-
-	private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
-
-	@Value("${pcp.ingestion.service.isUsedTibco}")
-	private Boolean isUsedTibco = Boolean.TRUE;
-
-	@Value("${pcp.ingestion.service.isPublishSingleClaim}")
-	private Boolean isPublishSingleClaim = Boolean.FALSE;
-
-	@Value("${pcp.ingestion.service.state}")
-	private String state;
-
-	@Scheduled(initialDelayString = "${job.pcp.contract.initial.delay}", fixedRateString = "${job.pcp.contract.fixed.delay}")
-	@MethodExecutionTime
-	public void scheduleToCreatedPCPContractFixedRateTask() {
-		log.info("Schedular Call to create pcp contract.....");
-		if (isUsedTibco) {
-			createPCPContract(tibcoQueryStr);
-		} else {
-			// Call Metavence to create Contract Records
-			createContractBymetavance(state);
-		}
-	}
-
-	@Scheduled(initialDelayString = "${job.post.contract.tocalculation.initial.delay}", fixedRateString = "${job.post.contract.tocalculation.fixed.delay}")
-	@MethodExecutionTime
-	public void schedulePostContractDataOnPCPCalculationFixedRateTask() {
-		log.info("Schedular Call for Posting Data on PCP calculation.....");
-		if (isPublishSingleClaim) {
-			publishSingleClaimToPcpCalculationService();
-		} else {
-			publishClaimsToPcpCalculationService();
-		}
-	}
+	@Value("${pcp.ingestion.process.workers.count:8}")
+	private Integer pcpIngestionProcessWorkersCount;
+	
+	@Value("${pcp.ingestion.service.numOfDays:10}")
+	private Integer numOfDays;
 
 	public List<PCPMemberContract> getAllContract() {
 		return (List<PCPMemberContract>) repository.findAll();
 	}
 
-	public void enableDisbaleTibcoServiceCall(Boolean isUsedTibco) {
-		log.info(isUsedTibco == true ? "Enabled Tibco Service Call" : "Disabled Tibco Service Call");
-		this.isUsedTibco = isUsedTibco;
-	}
-
-	public void createPCPContract(String tibcoQueryStr) {
+	public void createPCPContract() {
 		log.info("createPCPContract - Tibco Request to create pcp member contract started");
-		ExecutorService executor = Executors.newFixedThreadPool(8);
+		ExecutorService executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount);
 		String lookbackDays = configClient.providerLookBackDays();
 		LocalDate cutOffDate = LocalDate.now().minusDays(Integer.parseInt(lookbackDays));
-
 		for (State state : State.values()) {
 			executor.submit(() -> {
-				pcpMemberContractCreateProcessor.createProcessorByState(state, cutOffDate);
+				pcpMemberContractCreateProcessor.createProcessorByState(state, cutOffDate, numOfDays);
 			});
 		}
 		executor.shutdown();
 		log.info("createPCPContract - PCP Ingestion Service Process Complete...");
 	}
 
-	private void publishSingleClaimToPcpCalculationService() {
-		ExecutorService executorforClaim = Executors.newFixedThreadPool(8);
+	public void publishSingleClaimToPcpCalculationService() {
+		ExecutorService executorforClaim = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount);
 		for (State state : State.values()) {
 			executorforClaim.submit(() -> {
-				List<PCPMemberContract> contracts = repository.findByStatusAndStateCode(STATUS.STAGED.ordinal(),
+				List<PCPMemberContract> contractClaims = repository.findByStatusAndStateCode(STATUS.STAGED.ordinal(),
 						state.toString());
-				log.info("Start Publish {} contract records for state {}....", contracts.size(), state);
-				if (!contracts.isEmpty()) {
-					contracts.stream().forEach(contract -> {
+				log.info("Start Publish {} contract records for state {}....", contractClaims.size(), state);
+				if (!contractClaims.isEmpty()) {
+					contractClaims.stream().forEach(contract -> {
 						contract.getClaim().stream().forEach(claim -> {
 							ValidateProviderRequest request = ValidateProviderRequest.builder() //
 									.claimId(claim.getClaimId()) //
@@ -154,24 +119,26 @@ public class PCPIngestionService {
 						contract.setStatus(STATUS.COMPLETED);
 						repository.save(contract);
 					});
-					log.info("Publish single {} Contract to PCP-Calculation-service for state {}....", contracts.size(),
-							state);
+					pcpIngestionActivityRepository.updatePcpIngestionActivityForNumberOfClaim(contractClaims.size(),
+							state.toString());
+					log.info("Publish single {} Contract to PCP-Calculation-service for state {}....",
+							contractClaims.size(), state);
 				}
 			});
 		}
 		executorforClaim.shutdown();
 	}
 
-	private void publishClaimsToPcpCalculationService() {
-		ExecutorService executorforClaims = Executors.newFixedThreadPool(8);
+	public void publishClaimsToPcpCalculationService() {
+		ExecutorService executorforClaims = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount);
 		for (State state : State.values()) {
 			log.info("Start Publish records for state {}....", state);
-			List<PCPMemberContract> contracts = repository.findByStatusAndStateCode(STATUS.STAGED.ordinal(),
+			List<PCPMemberContract> contractClaims = repository.findByStatusAndStateCode(STATUS.STAGED.ordinal(),
 					state.toString());
 			executorforClaims.submit(() -> {
-				if (!contracts.isEmpty()) {
+				if (!contractClaims.isEmpty()) {
 					List<ValidateProviderRequest> request = new ArrayList<>();
-					contracts.stream().forEach(contract -> {
+					contractClaims.stream().forEach(contract -> {
 						contract.getClaim().stream().forEach(claim -> {
 							ValidateProviderRequest validateProviderRequest = ValidateProviderRequest.builder()
 									.claimId(claim.getClaimId()) //
@@ -180,16 +147,17 @@ public class PCPIngestionService {
 									.providerId(claim.getBillingProviderId()) //
 									.operatorId("PCP-ING") //
 									.state(claim.getStateCode()) //
-									.build();
+									.build(); //
 							request.add(validateProviderRequest);
-
 						});
 						ResponseEntity<MessageResponse> response = pcpCalculationClient
 								.publishAssignMembersPCP(request);
 						contract.setStatus(STATUS.COMPLETED);
 						repository.save(contract);
 					});
-					log.info("Publish {} Contract to PCP-Calculation-service for state {}....", contracts.size(),
+					pcpIngestionActivityRepository.updatePcpIngestionActivityForNumberOfClaim(contractClaims.size(),
+							state.toString());
+					log.info("Publish {} Contract to PCP-Calculation-service for state {}....", contractClaims.size(),
 							state);
 				}
 			});
@@ -197,7 +165,7 @@ public class PCPIngestionService {
 		executorforClaims.shutdown();
 	}
 
-	private void createContractBymetavance(String state) {
+	public void createContractBymetavance(String state) {
 		List<MbrProvNtwkAssn> mbrProvNtwkAssn;
 		if (last_maintanence_time_stamp.equals("null")) {
 			mbrProvNtwkAssn = metavanceRepo.findAllFirstHunderedMTVMemberContractEntity(state);
@@ -218,7 +186,6 @@ public class PCPIngestionService {
 						.contract(convertIntoString(createContractFromMetavenceRecords(contract))).numberOfEnrollee(3)
 						.status(STATUS.STAGED).numOfAttempt(0).build())
 				.collect(Collectors.toList());
-
 		if (memberContract.size() > 0) {
 			log.info("Start Staging Records..");
 			Date start = new Date();

@@ -20,7 +20,6 @@ import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.delta.pcpingestion.*" })
 @Slf4j
@@ -30,11 +29,11 @@ public class PcpIngestionServiceApplication {
 		SpringApplication.run(PcpIngestionServiceApplication.class, args);
 	}
 
-
 	@Bean
 	public RestTemplate restTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
 		TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-		SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+		SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy)
+				.build();
 		SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
 		HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
