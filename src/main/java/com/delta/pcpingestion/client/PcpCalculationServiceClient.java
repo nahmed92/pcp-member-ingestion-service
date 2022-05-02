@@ -49,7 +49,7 @@ public class PcpCalculationServiceClient {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		}
-		return responseEntity != null ? responseEntity.getBody() : null;
+		return responseEntity.getBody();
 
 	}
 

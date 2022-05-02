@@ -41,7 +41,7 @@ public class PcpIngestionControllerTest extends AbstractRestIntegrationTest {
 	@InjectMocks
 	private PcpIngestionController controller;
 
-	/*
+	
 	@Test
 	public void testCreateNewPCPMembercontract() throws Exception {
 		PCPMembersRequest member = new PCPMembersRequest();
@@ -66,7 +66,6 @@ public class PcpIngestionControllerTest extends AbstractRestIntegrationTest {
 				.content("")) //
 				.andExpect(status().isBadRequest());
 	}
-	*/
 	
 	@Test
 	public void testReturnRequestNotFoundWhenURLIsNotCorrect() throws Exception {

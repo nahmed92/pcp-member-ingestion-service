@@ -103,7 +103,7 @@ public class PcpMemberContractCreateProcessor {
 			log.info("Member call for tibco {}", paginatedtibcoQueryStr);
 			ResponseEntity<Member> members = tibcoClient.fetchPcpmemberFromTibco(paginatedtibcoQueryStr);
 			log.debug("Member Receive {}", members);
-			if (members != null && members.getBody() != null && members.getBody().getPcpMembers() != null) {
+			if (null != members && null != members.getBody() && null != members.getBody().getPcpMembers()) {
 				List<PCPMemberContract> contract = buildPcpMemberContract(
 						members.getBody().getPcpMembers().getContracts());
 				if (contract.size() > 0) {
