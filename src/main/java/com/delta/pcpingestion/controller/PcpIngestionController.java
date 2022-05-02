@@ -62,7 +62,7 @@ public class PcpIngestionController {
 			@ApiResponse(code = 200, message = "Successfully Get PCP Member Contract", response = PCPMemberContract[].class),
 			@ApiResponse(code = 400, message = "Bad Request", response = ServiceError.class),
 			@ApiResponse(code = 500, message = "Internal Server error", response = ServiceError.class) })
-	@GetMapping("/findAll")
+	@GetMapping("/find-all")
 	public ResponseEntity<List<PCPMemberContract>> findAllContract() throws ServiceException {
 		log.info("Find All PCP Contract");
 		List<PCPMemberContract> contracts = service.getAllContract();
@@ -73,7 +73,7 @@ public class PcpIngestionController {
 			@ApiResponse(code = 400, message = "Bad request.", response = ServiceError.class),
 			@ApiResponse(code = 404, message = "Unable validate provider.", response = ServiceError.class),
 			@ApiResponse(code = 500, message = "Internal server error.", response = ServiceError.class) })
-	@GetMapping(value = "/enableDisbaleTibcoServiceCall", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(value = "/enable-disbale-tibco-service-call", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public void enableDisableTibcoService(@RequestParam("isUsedTibco") Boolean isUsedTibco) {
 		pcpIngestionServiceSchedular.enableDisbaleTibcoServiceCall(isUsedTibco);
 	}
