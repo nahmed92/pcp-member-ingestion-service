@@ -46,21 +46,21 @@ public class PcpIngestionControllerTest extends AbstractRestIntegrationTest {
 		PCPMembersRequest member = new PCPMembersRequest();
 		member.setTibcoQueryStr(
 				"{\r\n" + "    'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1553}'\r\n" + "}");
-		mockMvc.perform(post("/pcpmembers/contract/create") //
+		mockMvc.perform(post("/pcp-members/contract/create") //
 				.contentType(MediaType.APPLICATION_JSON) //
 				.content(objectMapper.writeValueAsString(member))) //
 				.andExpect(status().isCreated());
 	}
 
 	@Test
-	public void testFindAllCntract() throws Exception {
-		mockMvc.perform(get("/pcpmembers/contract/findAll")) //
+	public void testFindAllContract() throws Exception {
+		mockMvc.perform(get("/pcp-members/contract/find-all")) //
 				.andExpect(status().isOk()); //
 	}
 
 	@Test
 	public void testReturnBadRequestWhenPayloadisNull() throws Exception {
-		mockMvc.perform(post("/pcpmembers/contract/create") //
+		mockMvc.perform(post("/pcp-members/contract/create") //
 				.contentType(MediaType.APPLICATION_JSON) //
 				.content("")) //
 				.andExpect(status().isBadRequest());
@@ -68,7 +68,7 @@ public class PcpIngestionControllerTest extends AbstractRestIntegrationTest {
 
 	@Test
 	public void testReturnRequestNotFoundWhenURLIsNotCorrect() throws Exception {
-		mockMvc.perform(post("/pcp/contract") //
+		mockMvc.perform(post("/pcp-members/contract") //
 				.contentType(MediaType.APPLICATION_JSON) //
 				.content("{\r\n" + "    'pcpMembersRequest':'{\"states\":[\"CA\"],\"numofdays\":1553}'\r\n" + "}")) //
 				.andExpect(status().isNotFound());
