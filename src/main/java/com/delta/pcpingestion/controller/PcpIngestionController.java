@@ -33,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
  * 
  */
 @RestController
-@RequestMapping(value = "/pcpmembers/contract", produces = "application/json")
-@Api(value = "/pcpmembers/contract")
+@RequestMapping(value = "/pcp-members/contract", produces = "application/json")
+@Api(value = "/pcp-members/contract")
 @Slf4j
 public class PcpIngestionController {
 
