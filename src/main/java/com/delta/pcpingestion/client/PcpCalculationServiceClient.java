@@ -97,7 +97,7 @@ public class PcpCalculationServiceClient {
 	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
 	public ResponseEntity<MessageResponse> publishAssignMembersPCP(List<ValidateProviderRequest> validateAssignMembers)
 			throws RuntimeException {
-		log.info("Call PCP Calculation Service Client.....");
+		log.info("START PcpCalculationServiceClient.publishAssignMembersPCP()");
 		UriComponentsBuilder builder = UriComponentsBuilder
 				.fromUriString(pcpCalculationServiceEndpoint + "/members-contracts-and-claims");
 		String uriBuilder = builder.build().encode().toUriString();
@@ -105,13 +105,16 @@ public class PcpCalculationServiceClient {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		ResponseEntity<MessageResponse> response = null;
 		try {
-			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,
-					new HttpEntity<>(validateAssignMembers, headers), MessageResponse.class);
-		} catch (RestClientException e) {
+			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,new HttpEntity<>(validateAssignMembers, headers), MessageResponse.class);
+			
+		} catch (RestClientException | URISyntaxException e) {
+			log.error("Unable to publish ",e);
 			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
-		} catch (URISyntaxException e) {
+		} catch (Exception e) {
+			log.error("Unable to publish ",e);
 			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		}
+		log.info("END PcpCalculationServiceClient.publishAssignMembersPCP()");
 		return response;
 	}
 

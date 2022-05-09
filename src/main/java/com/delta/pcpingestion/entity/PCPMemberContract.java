@@ -38,23 +38,16 @@ import lombok.ToString;
  * @since 1.0
  */
 @Data
-@Builder
 @Entity
 @ToString
 @NoArgsConstructor
 @Transactional
-@Table(name = PCPMemberContract.TABLE_NAME,  schema = "dbo")
+@Table(name = "contract",  schema = "dbo")
 @EnableJpaAuditing
 public class PCPMemberContract implements java.io.Serializable {
 
-	/**
-	 * Serialization Key
-	 */
 	private static final long serialVersionUID = 2757500429236458720L;
 
-	protected static final String TABLE_NAME = "contract";
-	
-	protected static final String SCHEMA= "dbo";
 
 	@Id
 	@NonNull

@@ -27,7 +27,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-@Table(name="Claim")
+@Table(name="contract_claim")
 @Embeddable
 public class Claim {
 

@@ -26,8 +26,11 @@ import com.delta.pcpingestion.dto.Member;
 import com.delta.pcpingestion.entity.Claim;
 import com.delta.pcpingestion.entity.PCPIngestionActivity;
 import com.delta.pcpingestion.entity.PCPMemberContract;
+import com.delta.pcpingestion.enums.PublishStatus;
+import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.delta.pcpingestion.repo.PCPIngestionActivityRepository;
+import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,7 +57,9 @@ public class PcpMemberContractCreateProcessor {
 
 	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MMM-yy");
 
+	@MethodExecutionTime
 	public void createProcessorByState(State state, LocalDate cutOffDate, Integer numOfDays) {
+		log.info("START PcpMemberContractCreateProcessor.createProcessorByState()");
 		long startTime = System.currentTimeMillis();
 		Map<String, String> params = new HashMap<>();
 		List<PCPMemberContract> contracts = null;
@@ -77,6 +82,7 @@ public class PcpMemberContractCreateProcessor {
 			activity.setTibcoDataStagePeriod(seconds);
 			pcpIngestionActivityRepository.save(activity);
 		}
+		log.info("END PcpMemberContractCreateProcessor.createProcessorByState()");
 	}
 
 	private void logContractActivityReceivedFromTibco(State state, PCPIngestionActivity activity,
@@ -132,7 +138,7 @@ public class PcpMemberContractCreateProcessor {
 						.contract(convertIntoString(contract)) //
 						.numberOfEnrollee(contract.getEnrollees().size()) //
 						.claim(listOfEnrollClaims(contract.getEnrollees())) //
-						.status(STATUS.STAGED) //
+						.status(PublishStatus.STAGED) //
 						.numOfAttempt(0) //
 						.build())
 				.collect(Collectors.toList());
