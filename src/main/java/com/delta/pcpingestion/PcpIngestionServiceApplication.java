@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PcpIngestionServiceApplication {
 
 	public static void main(String[] args) {
+		log.info("Starting PcpIngestionServiceApplication.main()");
 		SpringApplication.run(PcpIngestionServiceApplication.class, args);
 	}
 

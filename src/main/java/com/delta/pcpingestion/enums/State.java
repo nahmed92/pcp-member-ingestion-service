@@ -1,4 +1,4 @@
-package com.delta.pcpingestion.service;
+package com.delta.pcpingestion.enums;
 
 public enum State {
 	AL,

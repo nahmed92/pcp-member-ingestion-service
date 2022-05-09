@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.delta.pcpingestion.entity.Claim;
 import com.delta.pcpingestion.entity.PCPMemberContract;
+import com.delta.pcpingestion.enums.PublishStatus;
+import com.delta.pcpingestion.enums.State;
 
 /**
  * PCP Member Contract Repository This enable to perform database level
@@ -23,11 +25,12 @@ public interface ContractRepository extends JpaRepository<PCPMemberContract, Str
 
 	PCPMemberContract findByContractID(String contractId);
 
+	//FIXME:Query
 	@Query(value = "select * from dbo.contract contract"
 	        + " inner join dbo.contract_claim claim"
 			+ " on claim.pcpmembercontract_contract_id = contract.contract_id"
 			+ " where contract.status = :status and claim.statecode = :state", nativeQuery = true)
-	List<PCPMemberContract> findByStatusAndStateCode(int status, String state);
+	List<PCPMemberContract> findByStatusAndStateCode(PublishStatus status, State state);
 	
 	@Query(value = "select * from dbo.contract_claim where PCPMemberContract_contract_id in :contractIds", nativeQuery = true)
 	List<Claim> findAllClaimByContractIds(List<String> contractIds);

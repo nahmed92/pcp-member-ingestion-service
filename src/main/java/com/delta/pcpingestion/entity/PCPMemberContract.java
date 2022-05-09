@@ -17,6 +17,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.service.STATUS;
 
 import lombok.AllArgsConstructor;
@@ -39,12 +40,8 @@ import lombok.ToString;
 @Data
 @Builder
 @Entity
-@Getter
-@Setter
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 @Transactional
 @Table(name = PCPMemberContract.TABLE_NAME,  schema = "dbo")
 @EnableJpaAuditing
@@ -90,7 +87,7 @@ public class PCPMemberContract implements java.io.Serializable {
 
 	@NonNull
 	@Column(name = "status")
-	private STATUS status;
+	private PublishStatus status;
 	
 	@NonNull
 	@Column(name = "num_of_attempt")
