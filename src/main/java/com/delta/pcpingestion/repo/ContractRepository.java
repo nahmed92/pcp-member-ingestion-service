@@ -1,37 +1,25 @@
 package com.delta.pcpingestion.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.delta.pcpingestion.entity.Claim;
-import com.delta.pcpingestion.entity.PCPMemberContract;
+import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.enums.State;
 
-/**
- * PCP Member Contract Repository This enable to perform database level
- * operation
- * 
- * @author ca94197
- * @since 1.0
- */
 @Repository
 @Transactional
-public interface ContractRepository extends JpaRepository<PCPMemberContract, String> {
+public interface ContractRepository extends JpaRepository<ContractEntity, String> {
 
-	PCPMemberContract findByContractID(String contractId);
+	Optional<ContractEntity> findByContractId(String contractId);
 
-	//FIXME:Query
-	@Query(value = "select * from dbo.contract contract"
-	        + " inner join dbo.contract_claim claim"
-			+ " on claim.pcpmembercontract_contract_id = contract.contract_id"
-			+ " where contract.status = :status and claim.statecode = :state", nativeQuery = true)
-	List<PCPMemberContract> findByStatusAndStateCode(PublishStatus status, State state);
-	
-	@Query(value = "select * from dbo.contract_claim where PCPMemberContract_contract_id in :contractIds", nativeQuery = true)
-	List<Claim> findAllClaimByContractIds(List<String> contractIds);
+	@Query(value = "select * from dbo.contract "
+			+ " where publish_status = :publishStatus and state_codes like '%:state%' ", nativeQuery = true)
+	List<ContractEntity> findByPublishStatusAndStateCode(PublishStatus publishStatus, State state);
+
 }

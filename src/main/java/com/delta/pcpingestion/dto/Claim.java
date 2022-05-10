@@ -8,12 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Claim Class
- * 
- * @author ca94197
- * @since 1.0
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,8 +19,8 @@ public class Claim {
 
 	private String billProviderSpeciality;
 
-	@JsonFormat(pattern="dd-MMM-yy")
-	private Date receivedDate;
+	@JsonFormat(pattern="dd-MMM-yy") //FIXME: change format to yyyy
+	private Date receivedDate; 
 
 	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	private Date resolvedDate;

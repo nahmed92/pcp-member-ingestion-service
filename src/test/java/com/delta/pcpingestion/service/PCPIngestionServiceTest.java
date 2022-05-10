@@ -33,7 +33,8 @@ import com.delta.pcpingestion.dto.Enrollee;
 import com.delta.pcpingestion.dto.Member;
 import com.delta.pcpingestion.dto.MemberAddress;
 import com.delta.pcpingestion.dto.PcpMember;
-import com.delta.pcpingestion.entity.PCPMemberContract;
+import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -103,17 +104,15 @@ public class PCPIngestionServiceTest {
 
 	@Test
 	public void testGetAllContract() throws Exception {
-		Set<String> ids = new HashSet<>();
-		ids.add("1234");
-		ids.add("432");
-		PCPMemberContract entity = PCPMemberContract.builder().contract(
+		String ids = "1234,432";
+		ContractEntity entity = ContractEntity.builder().contractJson(
 				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
-				.contractID("123").memberId(ids).mtvPersonID(ids).status(STATUS.STAGED).numberOfEnrollee(3)
-				.numOfAttempt(0).build();
-		List<PCPMemberContract> list = new ArrayList<>();
+				.contractId("123").mtvPersonIds(ids).publishStatus(PublishStatus.STAGED).numberOfEnrollee(3)
+				.numOfRetries(0).build();
+		List<ContractEntity> list = new ArrayList<>();
 		list.add(entity);
 		when(repository.findAll()).thenReturn(list);
-		List<PCPMemberContract> response = pcpIngestionService.getAllContract();
+		List<ContractEntity> response = pcpIngestionService.getAllContract();
 		assertEquals(response.size(), 1);
 		assertEquals(response.get(0).getContractID(), "123");
 		assertEquals(response.get(0).getMemberId().size(), 2);
@@ -123,14 +122,12 @@ public class PCPIngestionServiceTest {
 
 	@Test
 	public void testCreateNewPCPMembercontract() throws Exception {
-		Set<String> ids = new HashSet<>();
-		ids.add("1234");
-		ids.add("432");
-		PCPMemberContract entity = PCPMemberContract.builder().contract(
+		String ids = "1234,432";
+		ContractEntity entity = ContractEntity.builder().contractJson(
 				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
-				.contractID("123").memberId(ids).mtvPersonID(ids).status(STATUS.STAGED).numberOfEnrollee(3)
-				.numOfAttempt(0).build();
-		List<PCPMemberContract> list = new ArrayList<>();
+				.contractId("123").mtvPersonIds(ids).publishStatus(PublishStatus.STAGED).numOfRetries(3)
+				.numOfRetries(0).build();
+		List<ContractEntity> list = new ArrayList<>();
 		list.add(entity);
 		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":${pagenum}}'}";
 		Member member = new Member();

@@ -3,7 +3,6 @@ package com.delta.pcpingestion.service;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -16,12 +15,11 @@ import org.springframework.stereotype.Service;
 import com.delta.pcpingestion.client.MessageResponse;
 import com.delta.pcpingestion.client.PcpCalculationServiceClient;
 import com.delta.pcpingestion.client.ValidateProviderRequest;
-import com.delta.pcpingestion.entity.Claim;
-import com.delta.pcpingestion.entity.PCPMemberContract;
+import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.enums.State;
+import com.delta.pcpingestion.mapper.Mapper;
 import com.delta.pcpingestion.repo.ContractRepository;
-import com.delta.pcpingestion.repo.PCPIngestionActivityRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +31,6 @@ public class PublisherService {
 
 	@Autowired
 	private ContractRepository repository;
-
-	@Autowired
-	private PCPIngestionActivityRepository pcpIngestionActivityRepository;
 
 	@Autowired
 	private PcpCalculationServiceClient pcpCalculationClient;
@@ -50,6 +45,9 @@ public class PublisherService {
 	private Integer numOfDays;
 
 	private ExecutorService executor;
+
+	@Autowired
+	private Mapper mapper;
 
 	@PostConstruct
 	public void init() {
@@ -72,24 +70,20 @@ public class PublisherService {
 		log.info("START PublisherService.publish()");
 
 		log.info("Start Publish records for state {}", state);
-		List<PCPMemberContract> contractClaims = repository.findByStatusAndStateCode(PublishStatus.STAGED, state);
+		List<ContractEntity> contractClaims = repository.findByPublishStatusAndStateCode(PublishStatus.STAGED, state);
 
 		publish(state, contractClaims);
 
 		log.info("END PublisherService.publish()");
 	}
 
-	private void publish(State state, List<PCPMemberContract> contractClaims) {
+	private void publish(State state, List<ContractEntity> contractClaims) {
 		log.info("START PublisherService.publish()");
 
 		if (!contractClaims.isEmpty()) {
 			executor.submit(() -> {
 				// FIXME: Partition request
 				contractClaims.stream().forEach(contract -> publish(contract));
-				pcpIngestionActivityRepository.updatePcpIngestionActivityForNumberOfClaim(contractClaims.size(), state);
-				log.info("Publish {} Contract to PCP-Calculation-service for state {}....", contractClaims.size(),
-						state);
-
 			});
 
 		}
@@ -97,28 +91,13 @@ public class PublisherService {
 
 	}
 
-	private void publish(PCPMemberContract contract) {
+	private void publish(ContractEntity contract) {
 		log.info("START PublisherService.publish()");
-		List<ValidateProviderRequest> requests = map(contract);
+		List<ValidateProviderRequest> requests = mapper.mapRequest(contract);
 		ResponseEntity<MessageResponse> response = pcpCalculationClient.publishAssignMembersPCP(requests);
-		contract.setStatus(PublishStatus.COMPLETED);
+		contract.setPublishStatus(PublishStatus.COMPLETED);
 		repository.save(contract);
 		log.info("END PublisherService.publish()");
-	}
-
-	private List<ValidateProviderRequest> map(PCPMemberContract contract) {
-		return contract.getClaim().stream().map(i -> map(contract, i)).collect(Collectors.toList());
-	}
-
-	private ValidateProviderRequest map(PCPMemberContract contract, Claim claim) {
-		ValidateProviderRequest validateProviderRequest = ValidateProviderRequest.builder().claimId(claim.getClaimId()) //
-				.contractId(contract.getContractID()) //
-				.memberId(contract.getMemberId().iterator().next()) //
-				.providerId(claim.getBillingProviderId()) //
-				.operatorId("PCP-ING") //
-				.state(claim.getStateCode()) //
-				.build(); //
-		return validateProviderRequest;
 	}
 
 	public void enableDisbaleTibcoServiceCall(Boolean isUsedTibco) {

@@ -19,7 +19,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.delta.pcpingestion.entity.PCPMemberContract;
+import com.delta.pcpingestion.entity.ContractEntity;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,7 +54,7 @@ public class PcpCalculationServiceClient {
 	}
 
 	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
-	public void publishContractToPcpCalcuationService(List<PCPMemberContract> contracts) throws RuntimeException {
+	public void publishContractToPcpCalcuationService(List<ContractEntity> contracts) throws RuntimeException {
 		log.info("Call PCP Calculation Service Client.....");
 		UriComponentsBuilder builder = UriComponentsBuilder
 				.fromUriString(pcpCalculationServiceEndpoint + "/process-pcp-member-contract");
@@ -63,7 +63,7 @@ public class PcpCalculationServiceClient {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		try {
 			restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST, new HttpEntity<>(contracts, headers),
-					new ParameterizedTypeReference<List<PCPMemberContract>>() {
+					new ParameterizedTypeReference<List<ContractEntity>>() {
 					});
 		} catch (RestClientException e) {
 			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
@@ -105,13 +105,14 @@ public class PcpCalculationServiceClient {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		ResponseEntity<MessageResponse> response = null;
 		try {
-			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,new HttpEntity<>(validateAssignMembers, headers), MessageResponse.class);
-			
+			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,
+					new HttpEntity<>(validateAssignMembers, headers), MessageResponse.class);
+
 		} catch (RestClientException | URISyntaxException e) {
-			log.error("Unable to publish ",e);
+			log.error("Unable to publish ", e);
 			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		} catch (Exception e) {
-			log.error("Unable to publish ",e);
+			log.error("Unable to publish ", e);
 			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
 		}
 		log.info("END PcpCalculationServiceClient.publishAssignMembersPCP()");
@@ -119,7 +120,7 @@ public class PcpCalculationServiceClient {
 	}
 
 	@Recover
-	public void recover(RuntimeException t, List<PCPMemberContract> contracts) {
+	public void recover(RuntimeException t, List<ContractEntity> contracts) {
 		log.info("Alert - PCP-Calculation-Service is not responding......");
 	}
 
