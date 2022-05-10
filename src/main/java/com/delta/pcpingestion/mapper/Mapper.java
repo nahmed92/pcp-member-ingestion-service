@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.delta.pcpingestion.client.ValidateProviderRequest;
-import com.delta.pcpingestion.dto.Claim;
-import com.delta.pcpingestion.dto.Contract;
-import com.delta.pcpingestion.dto.Enrollee;
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.PublishStatus;
+import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
+import com.delta.pcpingestion.interservice.tibco.dto.Claim;
+import com.delta.pcpingestion.interservice.tibco.dto.Contract;
+import com.delta.pcpingestion.interservice.tibco.dto.Enrollee;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -82,23 +82,23 @@ public class Mapper {
 		return contract;
 	}
 
-	public List<ValidateProviderRequest> mapRequest(ContractEntity contractEntity) {
+	public List<MemberContractClaimRequest> mapRequest(ContractEntity contractEntity) {
 
-		List<ValidateProviderRequest> requestList = new LinkedList<>();
+		List<MemberContractClaimRequest> requestList = new LinkedList<>();
 
 		Contract contract = map(contractEntity.getContractJson());
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			for (Claim claim : enrollee.getClaims()) {
-				ValidateProviderRequest request = map(contract.getContractID(), enrollee, claim);
+				MemberContractClaimRequest request = map(contract.getContractID(), enrollee, claim);
 				requestList.add(request);
 			}
 		}
 		return requestList;
 	}
 
-	private ValidateProviderRequest map(String contractId, Enrollee enrollee, Claim claim) {
-		ValidateProviderRequest validateProviderRequest = ValidateProviderRequest.builder().claimId(claim.getClaimId()) //
+	private MemberContractClaimRequest map(String contractId, Enrollee enrollee, Claim claim) {
+		MemberContractClaimRequest validateProviderRequest = MemberContractClaimRequest.builder().claimId(claim.getClaimId()) //
 				.contractId(contractId).memberId(enrollee.getMemberId()).providerId(claim.getBillingProviderId())
 				.operatorId("PCP-ING").state(claim.getStateCode()).build();
 		return validateProviderRequest;

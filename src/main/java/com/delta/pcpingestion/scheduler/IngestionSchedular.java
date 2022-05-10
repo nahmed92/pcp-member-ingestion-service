@@ -1,11 +1,10 @@
 package com.delta.pcpingestion.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.delta.pcpingestion.service.PCPIngestionService;
+import com.delta.pcpingestion.service.IngestionService;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 
 import lombok.AllArgsConstructor;
@@ -18,18 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class PCPIngestionSchedular {
+public class IngestionSchedular {
 
 	@Autowired
-	private PCPIngestionService pcpIngestionService;
+	private IngestionService ingestionService;
 
 	@Scheduled(initialDelayString = "${job.pcp.contract.initial.delay}", fixedRateString = "${job.pcp.contract.fixed.delay}")
 	@MethodExecutionTime
-	public void scheduleToCreatedPCPContractFixedRateTask() {
-		log.info("START PCPIngestionSchedular.scheduleToCreatedPCPContractFixedRateTask()");
+	public void scheduleIngest() {
+		log.info("START IngestionSchedular.scheduleIngest()");
 	
-		pcpIngestionService.ingest();
+		ingestionService.ingest();
 
-		log.info("END PCPIngestionSchedular.scheduleToCreatedPCPContractFixedRateTask()");
+		log.info("END IngestionSchedular.scheduleIngest()");
 	}
 }

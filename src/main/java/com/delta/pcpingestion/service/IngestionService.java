@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.delta.pcpingestion.client.PCPConfigServiceClient;
 import com.delta.pcpingestion.enums.State;
+import com.delta.pcpingestion.interservice.PCPConfigServiceClient;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @Component
-public class PCPIngestionService {
+public class IngestionService {
 
 	@Autowired
 	private PCPConfigServiceClient configClient;
@@ -33,6 +33,13 @@ public class PCPIngestionService {
 
 	@Value("${pcp.ingestion.service.numOfDays:10}")
 	private Integer numOfDays;
+
+	private ExecutorService executor;
+
+	@PostConstruct
+	public void init() {
+		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount);
+	}
 
 	@MethodExecutionTime
 	public void ingest() {
@@ -61,10 +68,4 @@ public class PCPIngestionService {
 
 	}
 
-	private ExecutorService executor;
-
-	@PostConstruct
-	public void init() {
-		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount);
-	}
 }

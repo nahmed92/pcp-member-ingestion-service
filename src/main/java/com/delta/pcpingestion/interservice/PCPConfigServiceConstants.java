@@ -1,4 +1,4 @@
-package com.delta.pcpingestion.client;
+package com.delta.pcpingestion.interservice;
 
 public class PCPConfigServiceConstants {
 

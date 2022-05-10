@@ -8,16 +8,14 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.delta.pcpingestion.client.MessageResponse;
-import com.delta.pcpingestion.client.PcpCalculationServiceClient;
-import com.delta.pcpingestion.client.ValidateProviderRequest;
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.enums.State;
+import com.delta.pcpingestion.interservice.PcpCalculationServiceClient;
+import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
 import com.delta.pcpingestion.mapper.Mapper;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
@@ -72,12 +70,12 @@ public class PublisherService {
 		log.info("Start Publish records for state {}", state);
 		List<ContractEntity> contractClaims = repository.findByPublishStatusAndStateCode(PublishStatus.STAGED, state);
 
-		publish(state, contractClaims);
+		publish(contractClaims);
 
 		log.info("END PublisherService.publish()");
 	}
 
-	private void publish(State state, List<ContractEntity> contractClaims) {
+	private void publish( List<ContractEntity> contractClaims) {
 		log.info("START PublisherService.publish()");
 
 		if (!contractClaims.isEmpty()) {
@@ -91,10 +89,10 @@ public class PublisherService {
 
 	}
 
-	private void publish(ContractEntity contract) {
+	private void publish(ContractEntity contract) { // multiple contracts?
 		log.info("START PublisherService.publish()");
-		List<ValidateProviderRequest> requests = mapper.mapRequest(contract);
-		ResponseEntity<MessageResponse> response = pcpCalculationClient.publishAssignMembersPCP(requests);
+		List<MemberContractClaimRequest> requests = mapper.mapRequest(contract);
+		pcpCalculationClient.publish(requests);
 		contract.setPublishStatus(PublishStatus.COMPLETED);
 		repository.save(contract);
 		log.info("END PublisherService.publish()");

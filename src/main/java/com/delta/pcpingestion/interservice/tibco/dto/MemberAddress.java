@@ -1,4 +1,4 @@
-package com.delta.pcpingestion.dto;
+package com.delta.pcpingestion.interservice.tibco.dto;
 
 import lombok.Data;
 

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.delta.pcpingestion.client.TibcoClient;
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.State;
+import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 
@@ -37,8 +36,7 @@ public class ContractIngester {
 
 	@MethodExecutionTime
 	public void ingestByState(State state, LocalDate cutOffDate, Integer numOfDays) {
-		log.info("START PcpMemberContractCreateProcessor.createProcessorByState()");
-		long startTime = System.currentTimeMillis();
+		log.info("START ContractIngester.ingestByState()");
 		Map<String, String> params = new HashMap<>();
 		LocalDate processDate = LocalDate.now();
 		log.info("Start process for [" + state + "] for cutOffDate[" + cutOffDate + "]");
@@ -46,18 +44,14 @@ public class ContractIngester {
 			params.put("state", "\"" + state.toString() + "\"");
 			params.put("numofdays", numOfDays.toString());
 			params.put("receiveddate", processDate.format(df).toString());
-			createPcpMemberContract(state, params);
+			ingestAndPersist(state, params);
 			processDate = processDate.minusDays(numOfDays);
 		}
-		long endTime = System.currentTimeMillis();
-		long seconds = TimeUnit.MILLISECONDS.toSeconds((endTime - startTime));
-		log.info(" Thread Name : {} taken to complete process : {} second[s]", Thread.currentThread().getName(),
-				seconds);
-
-		log.info("END PcpMemberContractCreateProcessor.createProcessorByState()");
+		log.info("END ContractIngester.ingestByState()");
 	}
 
-	private void createPcpMemberContract(State state, Map<String, String> params) {
+	private void ingestAndPersist(State state, Map<String, String> params) {
+		log.info("START ContractIngester.ingestAndPersist()");
 		int pagenum = 0;
 		Boolean isMorerecods = Boolean.TRUE;
 		while (isMorerecods) {
@@ -79,18 +73,21 @@ public class ContractIngester {
 			}
 			pagenum = pagenum + 1;
 		}
+		log.info("END ContractIngester.ingestAndPersist()");
 	}
 
 	private boolean isAllowedToSave(String contractId) {
+		boolean returnValue = false;
 		Optional<ContractEntity> optionalContractEntity = repository.findByContractId(contractId);
 		if (optionalContractEntity.isEmpty()) {
-			return true;
+			returnValue = true;
 		} else {
 			LocalDate lastUpdateDate = optionalContractEntity.get().getLastUpdatedAt().toLocalDateTime().toLocalDate();
 			LocalDate date = lastUpdateDate.plusDays(7);
-			return (date.isBefore(LocalDate.now())) ? true : false;
+			returnValue = (date.isBefore(LocalDate.now())) ? true : false;
 		}
-
+		log.info("for contractId {}, isAllowdTosave:{} ", contractId, returnValue);
+		return returnValue;
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.delta.pcpingestion.client;
+package com.delta.pcpingestion.interservice.tibco;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,8 +19,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.delta.pcpingestion.dto.Member;
 import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.interservice.tibco.dto.Member;
 import com.delta.pcpingestion.mapper.Mapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TibcoClient {
 
-	@Value("${pcp.ingestion.service.tibcoPcpMemberUrl}")
+	@Value("${pcp.ingestion.service.tibcoPcpMemberUrl}") //FIXME: rename
 	private String tibcoPcpMemberUrl;
 
 	@Value("${pcp.ingestion.service.basicAuthUser}")
@@ -49,7 +49,7 @@ public class TibcoClient {
 
 	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.tibco.service.retry.maxattempts:3}")
 	public List<ContractEntity> fetchContracts(Map<String, String> params) {
-		
+		log.info("START TibcoClient.fetchContracts()");
 		String tibcoRequest = StrSubstitutor.replace(tibcoQueryStr, params);
 		log.info("Member call for tibco {}", tibcoRequest);
 		List<ContractEntity> contracts = List.of();
@@ -58,24 +58,32 @@ public class TibcoClient {
 		if (null != response && null != response.getBody() && null != response.getBody().getPcpMembers()) {
 			contracts = mapper.map(response.getBody().getPcpMembers().getContracts());
 		}
+		log.info("END TibcoClient.fetchContracts()");
 		return contracts;
 	}
 	private ResponseEntity<Member> callTibco(String tibcoQueryStr) {
-		log.info("Tibco Client Call to get records......");
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(tibcoPcpMemberUrl);
-		String uriBuilder = builder.build().encode().toUriString();
-		HttpHeaders headers = new HttpHeaders();
-		headers.setBasicAuth(basicAuthUser, basicAuthPassword);
+		log.info("START TibcoClient.callTibco()");
+		
+		String uriBuilder = UriComponentsBuilder.fromUriString(tibcoPcpMemberUrl).build().encode().toUriString();
 		ResponseEntity<Member> response = null;
 		try {
+			log.info("Calling tibco request {}",tibcoQueryStr);
 			response = restTemplate.exchange(new URI(uriBuilder), HttpMethod.POST,
-					new HttpEntity<>(tibcoQueryStr, headers), Member.class);
+					new HttpEntity<>(tibcoQueryStr, createHttpHeaders()), Member.class);
+			log.info("Got tibco response {}",response);
+			
 		} catch (RestClientException e) {
 			throw new RuntimeException("Exception in Rest client {}", e);
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("Exception in URI Syntax Exception {}", e);
 		}
+		log.info("END TibcoClient.callTibco()");
 		return response;
+	}
+	private HttpHeaders createHttpHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setBasicAuth(basicAuthUser, basicAuthPassword);
+		return headers;
 	}
 
 	@Recover
