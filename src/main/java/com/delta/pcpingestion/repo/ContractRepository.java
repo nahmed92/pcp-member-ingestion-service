@@ -18,8 +18,7 @@ public interface ContractRepository extends JpaRepository<ContractEntity, String
 
 	Optional<ContractEntity> findByContractId(String contractId);
 
-	@Query(value = "select * from dbo.contract "
-			+ " where publish_status = :publishStatus and state_codes like '%:state%' ", nativeQuery = true)
-	List<ContractEntity> findByPublishStatusAndStateCode(PublishStatus publishStatus, State state);
+	@Query(value = "select * from dbo.contract where publish_status = :publishStatus and state_codes like %:state% ", nativeQuery = true)
+	List<ContractEntity> findByPublishStatusAndStateCode(String publishStatus, String state);
 
 }

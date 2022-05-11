@@ -68,7 +68,7 @@ public class PublisherService {
 		log.info("START PublisherService.publish()");
 
 		log.info("Start Publish records for state {}", state);
-		List<ContractEntity> contractClaims = repository.findByPublishStatusAndStateCode(PublishStatus.STAGED, state);
+		List<ContractEntity> contractClaims = repository.findByPublishStatusAndStateCode(PublishStatus.STAGED.name(), state.name());
 
 		publish(contractClaims);
 
