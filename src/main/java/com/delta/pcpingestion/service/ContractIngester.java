@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -60,7 +61,7 @@ public class ContractIngester {
 			log.debug("Member Receive {}", contractEntities);
 			if (CollectionUtils.isNotEmpty(contractEntities)) {
 				List<ContractEntity> entitiesToSave = contractEntities.stream()
-						.filter(i -> isAllowedToSave(i.getContractId())).collect(Collectors.toList());
+						.filter(i -> isAllowedToSave(i)).collect(Collectors.toList());
 
 				if (CollectionUtils.isNotEmpty(entitiesToSave)) {
 					repository.saveAll(entitiesToSave);
@@ -76,17 +77,22 @@ public class ContractIngester {
 		log.info("END ContractIngester.ingestAndPersist()");
 	}
 
-	private boolean isAllowedToSave(String contractId) {
+	// Setting Id for contract
+	private boolean isAllowedToSave(ContractEntity contract) {
 		boolean returnValue = false;
-		Optional<ContractEntity> optionalContractEntity = repository.findByContractId(contractId);
+		Optional<ContractEntity> optionalContractEntity = repository.findByContractId(contract.getContractId());
 		if (optionalContractEntity.isEmpty()) {
+			contract.setId(UUID.randomUUID().toString());
 			returnValue = true;
 		} else {
 			LocalDate lastUpdateDate = optionalContractEntity.get().getLastUpdatedAt().toLocalDateTime().toLocalDate();
 			LocalDate date = lastUpdateDate.plusDays(7);
 			returnValue = (date.isBefore(LocalDate.now())) ? true : false;
+			if(returnValue) {
+				contract.setId(optionalContractEntity.get().getId());
+			}
 		}
-		log.info("for contractId {}, isAllowdTosave:{} ", contractId, returnValue);
+		log.info("for contractId {}, isAllowdTosave:{} ", contract.getContractId(), returnValue);
 		return returnValue;
 	}
 

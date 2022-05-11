@@ -51,7 +51,6 @@ public class TibcoClient {
 	public List<ContractEntity> fetchContracts(Map<String, String> params) {
 		log.info("START TibcoClient.fetchContracts()");
 		String tibcoRequest = StrSubstitutor.replace(tibcoQueryStr, params);
-		log.info("Member call for tibco {}", tibcoRequest);
 		List<ContractEntity> contracts = List.of();
 		ResponseEntity<Member> response = callTibco(tibcoRequest);
 		
