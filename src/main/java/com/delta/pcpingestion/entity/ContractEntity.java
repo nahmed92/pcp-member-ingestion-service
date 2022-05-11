@@ -8,6 +8,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.transaction.Transactional;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,33 +39,28 @@ public class ContractEntity implements java.io.Serializable {
 	@Column(name = "id")
 	private String id;
 
-	@NonNull
 	@Column(name = "contract_json")
 	private String contractJson;
 
 	@Column(name = "mtv_person_ids")
 	private String mtvPersonIds;
-	
-	
+		
 	@Column(name = "claims_ids")
 	private String claimIds;
 
 	@Column(name = "state_codes")
 	private String stateCodes;
 
-	@Column(name = "v_contract_id")
+	@Column(name = "v_contract_id", insertable = false, updatable = false)
 	private String contractId;
 
-	@NonNull
 	@Column(name = "num_of_enrollee")
 	private Integer numberOfEnrollee;
 
-	@NonNull
 	@Column(name = "publish_status")
 	@Enumerated(EnumType.STRING)
 	private PublishStatus publishStatus;
 
-	@NonNull
 	@Column(name = "num_of_retries")
 	private Integer numOfRetries;
 

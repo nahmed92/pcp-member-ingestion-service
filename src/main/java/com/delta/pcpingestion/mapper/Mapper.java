@@ -37,13 +37,15 @@ public class Mapper {
 	}
 
 	private ContractEntity map(Contract contract) {
-		ContractEntity entity = ContractEntity.builder().id(UUID.randomUUID().toString()).publishStatus(PublishStatus.STAGED)
-				.numOfRetries(0).build();
+		ContractEntity entity = ContractEntity.builder() //
+				.publishStatus(PublishStatus.STAGED) //
+				.numOfRetries(0) //
+				.build();
 
 		Set<String> stateCodes = new HashSet<>();
 		Set<String> mtvPersionIds = new HashSet<>();
 		Set<String> claimIds = new HashSet<>();
-
+        
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			mtvPersionIds.add(enrollee.getMtvPersonID());
 			for (Claim claim : enrollee.getClaims()) {
@@ -51,13 +53,14 @@ public class Mapper {
 				claimIds.add(claim.getClaimId());
 			}
 		}
+		// setting contractId for validation if already not exist
+		// or save before one week
+		entity.setContractId(contract.getContractID());
 		entity.setContractJson(convertIntoString(contract));
 		entity.setNumberOfEnrollee(contract.getEnrollees().size());
 		entity.setMtvPersonIds(String.join(",", mtvPersionIds));
-		entity.setStateCodes(String.join(",", mtvPersionIds));
-
+		entity.setStateCodes(String.join(",", stateCodes));
 		return entity;
-
 	}
 
 	private String convertIntoString(final Contract contract) {
@@ -98,9 +101,14 @@ public class Mapper {
 	}
 
 	private MemberContractClaimRequest map(String contractId, Enrollee enrollee, Claim claim) {
-		MemberContractClaimRequest validateProviderRequest = MemberContractClaimRequest.builder().claimId(claim.getClaimId()) //
-				.contractId(contractId).memberId(enrollee.getMemberId()).providerId(claim.getBillingProviderId())
-				.operatorId("PCP-ING").state(claim.getStateCode()).build();
+		MemberContractClaimRequest validateProviderRequest = MemberContractClaimRequest.builder()
+				.claimId(claim.getClaimId()) //
+				.contractId(contractId) //
+				.memberId(enrollee.getMemberId()) //
+				.providerId(claim.getBillingProviderId()) //
+				.operatorId("PCP-ING") //
+				.state(claim.getStateCode()) //
+				.build();
 		return validateProviderRequest;
 	}
 
