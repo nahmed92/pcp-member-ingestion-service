@@ -102,6 +102,24 @@ public class IngestionServiceTest {
 	}
 
 //	@Test
+//	public void testGetAllContract() throws Exception {
+//		String ids = "1234,432";
+//		ContractEntity entity = ContractEntity.builder().contractJson(
+//				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
+//				.contractId("123").mtvPersonIds(ids).publishStatus(PublishStatus.STAGED).numberOfEnrollee(3)
+//				.numOfRetries(0).build();
+//		List<ContractEntity> list = new ArrayList<>();
+//		list.add(entity);
+//		when(repository.findAll()).thenReturn(list);
+//		List<ContractEntity> response = pcpIngestionService.getClass());
+//		assertEquals(response.size(), 1);
+//		assertEquals(response.get(0).getContractID(), "123");
+//		assertEquals(response.get(0).getMemberId().size(), 2);
+//		assertEquals(response.get(0).getMtvPersonID().size(), 2);
+//		assertEquals(response.get(0).getStatus(), STATUS.STAGED);
+//	}
+
+//	@Test
 //	public void testCreateNewPCPMembercontract() throws Exception {
 //		String ids = "1234,432";
 //		ContractEntity entity = ContractEntity.builder().contractJson(
