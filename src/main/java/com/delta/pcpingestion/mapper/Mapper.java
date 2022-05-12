@@ -59,6 +59,7 @@ public class Mapper {
 		entity.setContractJson(convertIntoString(contract));
 		entity.setNumberOfEnrollee(contract.getEnrollees().size());
 		entity.setMtvPersonIds(String.join(",", mtvPersionIds));
+		entity.setClaimIds(String.join(",", claimIds));
 		entity.setStateCodes(String.join(",", stateCodes));
 		return entity;
 	}

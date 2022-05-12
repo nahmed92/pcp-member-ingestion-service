@@ -52,7 +52,7 @@ ENTRYPOINT java $JAVA_OPTS \
     -Dmetavance.database.password=${METAVANCE_DATABASE_PASSWORD} \
     -Dmetavance.database.driverClassName=${METAVANCE_DATABASE_DRIVERCLASS_NAME} \
     -Dmetavance.database.hibernate.dialect=${METAVANCE_DATABASE_HIBERNATE_DIALECT} \    
-    -Dpcp.ingestion.service.tibco.ur=${PCP_INGESTION_SERVICE_TIBCOPCPMEMBER_URL} \
+    -Dpcp.ingestion.service.tibco.url=${PCP_INGESTION_SERVICE_TIBCOPCPMEMBER_URL} \
     -Dpcp.ingestion.service.basicAuthUser=${PCP_INGESTION_SERVICE_BASIC_AUTH_USER} \
     -Dpcp.ingestion.service.basicAuthPassword=${PCP_INGESTION_SERVICE_BASIC_AUTH_PASSWORD} \
     -Dpcp.ingestion.service.isUsedTibco=${PCP_INGESTION_SERVICE_IS_USED_TIBCO} \
@@ -65,4 +65,5 @@ ENTRYPOINT java $JAVA_OPTS \
     -Djob.pcp.contract.fixed.delay=${JOB_PCP_CONTRACT_FIXED_DELAY} \
     -Djob.post.contract.tocalculation.initial.delay=${JOB_POST_CONTRACT_TO_CALCULATON_INITIAL_DELAY} \
     -Djob.post.contract.tocalculation.fixed.delay=${JOB_POST_CONTRACT_TO_CALCULATON_FIXED_DELAY} \
+    -Denvironment=${ENVIRONMENT} \
     -jar /pcp-member-ingestion-service-1.0.0.jar
