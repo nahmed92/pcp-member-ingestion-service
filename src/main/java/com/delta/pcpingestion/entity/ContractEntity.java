@@ -51,7 +51,7 @@ public class ContractEntity implements java.io.Serializable {
 	@Column(name = "state_codes")
 	private String stateCodes;
 
-	@Column(name = "v_contract_id", insertable =false)
+	@Column(name = "v_contract_id", insertable = false, updatable = false)
 	private String contractId;
 
 	@Column(name = "num_of_enrollee")
