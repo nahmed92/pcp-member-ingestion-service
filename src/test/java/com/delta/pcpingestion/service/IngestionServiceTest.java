@@ -3,10 +3,12 @@ package com.delta.pcpingestion.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.PublishStatus;
+import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.interservice.tibco.dto.Claim;
 import com.delta.pcpingestion.interservice.tibco.dto.Contract;
@@ -51,23 +55,20 @@ public class IngestionServiceTest {
 	private ContractRepository repository;
 
 	@Mock
-	private TibcoClient tibcoRestTemplate;
+	private TibcoClient tibcoClient;
 
 	@Mock
 	private com.delta.pcpingestion.interservice.PCPConfigServiceClient configClient;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	@InjectMocks
-	private IngestionService pcpIngestionService;
+	private ContractIngester contractIngester;
 
 	private PcpMember pcpMember;
 
 	@BeforeEach
 	public void before() {
-		ReflectionTestUtils.setField(pcpIngestionService, "objectMapper", objectMapper);
-		ReflectionTestUtils.setField(pcpIngestionService, "pcpIngestionProcessWorkersCount", 8);
+	//	ReflectionTestUtils.setField(contractIngester, "objectMapper", objectMapper);
+	//	ReflectionTestUtils.setField(contractIngester, "pcpIngestionProcessWorkersCount", 8);
 		pcpMember = new PcpMember();
 		Claim claim = new Claim();
 		claim.setClaimId("1");
@@ -118,26 +119,36 @@ public class IngestionServiceTest {
 //		assertEquals(response.get(0).getMtvPersonID().size(), 2);
 //		assertEquals(response.get(0).getStatus(), STATUS.STAGED);
 //	}
-
+	
 	@Test
-	public void testCreateNewPCPMembercontract() throws Exception {
-		String ids = "1234,432";
-		ContractEntity entity = ContractEntity.builder().contractJson(
-				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
-				.contractId("123").mtvPersonIds(ids).publishStatus(PublishStatus.STAGED).numOfRetries(3)
-				.numOfRetries(0).build();
-		List<ContractEntity> list = new ArrayList<>();
-		list.add(entity);
-		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":${pagenum}}'}";
-		Member member = new Member();
-		member.setPcpMembers(pcpMember);
-		ResponseEntity<Member> pcpMemberResp = new ResponseEntity<Member>(member, HttpStatus.OK);
-		when(tibcoRestTemplate.fetchContracts(
-				"{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":0}'}"))
-						.thenReturn(pcpMemberResp);
-		when(configClient.providerLookBackDays()).thenReturn("60");
-		pcpIngestionService.createPCPContract();
-
+	public void testContractIngester() throws Exception {
+//		ContractEntity entity = ContractEntity.builder() //
+//				.claimIds("1234").contractId("3456").id(UUID.randomUUID().toString()).build();
+//		when(tibcoClient.fetchContracts(Mockito.anyMap())).thenReturn(Lists.list(entity));
+//		LocalDate cutOffDays  = LocalDate.now().minusDays(5);
+//		contractIngester.ingestByState(State.CA, cutOffDays, 5);
+//		
 	}
+
+//	@Test
+//	public void testCreateNewPCPMembercontract() throws Exception {
+//		String ids = "1234,432";
+//		ContractEntity entity = ContractEntity.builder().contractJson(
+//				"{\"contractID\":\"1209709016\",\"groupNumber\":null,\"divisionNumber\":null,\"enrollees\":[{\"memberId\":\"02\",\"networkId\":null,\"providerID\":null,\"product\":null,\"mtvPersonID\":\"0198113012305856\",\"memberAddress\":null,\"claims\":[{\"claimId\":\"20220186124792\",\"billingProviderId\":\"PRV240829640\",\"billProviderSpeciality\":null,\"receivedDate\":\"2022-01-18 00:00:00.0\",\"resolvedDate\":\"2022-01-21 00:00:00.0\",\"serviceNumber\":null,\"emergencyFlag\":null,\"encounterFlag\":null}]}]}")
+//				.contractId("123").mtvPersonIds(ids).publishStatus(PublishStatus.STAGED).numOfRetries(3)
+//				.numOfRetries(0).build();
+//		List<ContractEntity> list = new ArrayList<>();
+//		list.add(entity);
+//		String tibcoQuery = "{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":${pagenum}}'}";
+//		Member member = new Member();
+//		member.setPcpMembers(pcpMember);
+//		ResponseEntity<Member> pcpMemberResp = new ResponseEntity<Member>(member, HttpStatus.OK);
+//		when(tibcoRestTemplate.fetchContracts(
+//				"{'pcpMembersRequest':'{\"states\":[\"NC\",\"OK\",\"AK\",\"CT\",\"LA\"],\"numofdays\":30,\"receiveddate\":\"16-FEB-22 12:00:00 AM\",\"pagenum\":0}'}"))
+//						.thenReturn(pcpMemberResp);
+//		when(configClient.providerLookBackDays()).thenReturn("60");
+//		pcpIngestionService.createPCPContract();
+//
+//	}
 
 }

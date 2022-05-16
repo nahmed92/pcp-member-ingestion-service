@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TibcoClient {
 
-	@Value("${pcp.ingestion.service.tibcoPcpMemberUrl}") //FIXME: rename
+	@Value("${pcp.ingestion.service.tibco.url}")
 	private String tibcoPcpMemberUrl;
 
 	@Value("${pcp.ingestion.service.basicAuthUser}")
@@ -60,6 +60,7 @@ public class TibcoClient {
 		log.info("END TibcoClient.fetchContracts()");
 		return contracts;
 	}
+	
 	private ResponseEntity<Member> callTibco(String tibcoQueryStr) {
 		log.info("START TibcoClient.callTibco()");
 		
