@@ -168,7 +168,7 @@ pipeline {
                             ],)
 							}
 						}
-						script {
+					/*	script {
 							def parameterMap=new HashMap();
 							def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
 							def ApplicationArea="GMMO"
@@ -180,7 +180,7 @@ pipeline {
 							parameterMap.put("APPLICATION_AREA",ApplicationArea);
 							parameterMap.put("FEATURES",CMVALIDATOR.DESCRIPTION);
 							release="MNT."+cmdb.jiraIssue("Build Note",parameterMap)
-						}
+						}*/
 					}
 					post{
 					    always{
