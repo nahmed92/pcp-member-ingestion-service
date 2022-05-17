@@ -172,6 +172,7 @@ pipeline {
 							def parameterMap=new HashMap();
 							def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
 							def ApplicationArea="GMMO"
+							def APP="gmmo-dcu-cu"
 							parameterMap.put("PROJECT","CM");
 							parameterMap.put("TAG",tag);
 							parameterMap.put("APP",APP);
@@ -236,6 +237,8 @@ pipeline {
 				script {
 					def parameterMap=new HashMap();
 					def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
+					def ApplicationArea="GMMO"
+					def APP="gmmo-dcu-cu"
 					parameterMap.put("PROJECT","CM");
 					parameterMap.put("TAG",tag);
 					parameterMap.put("APP",APP);
@@ -319,6 +322,8 @@ pipeline {
 		   		checkpoint 'Deploy - MOT';
 				script {
 					def parameterMap=new HashMap();
+					def ApplicationArea="GMMO"
+					def APP="gmmo-dcu-cu"
 					def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
 					parameterMap.put("PROJECT","CM");
 					parameterMap.put("TAG",tag);
@@ -402,6 +407,8 @@ pipeline {
 				checkpoint 'Create CM Record-PROD';
 				script {
 					CMIMPLEMENTOR=input(message: "Do you want to promote build to Higher Enviornment , click PROCEED or ABORT ?", submitterParameter: 'approver')
+					def ApplicationArea="GMMO"
+					def APP="gmmo-dcu-cu"
             		def parameterMap=new HashMap();
 					parameterMap.put("PROJECT","CM");
            	 		parameterMap.put("APP","${APP}");
@@ -537,8 +544,8 @@ pipeline {
 	SCANNER_HOME= tool 'SonarQubeScanner'
     //Application Area  and App as defined in Jira Change Management Project
 
-	ApplicationArea=""
-    APP=""
+	ApplicationArea="GMMO"
+    APP="gmmo-dcu-cu"
     //team Dl and Release Management Team
 	SEND_MAIL = "ITSSReleaseTeam@delta.org,KBasireddy@delta.org,skalahasthi2@delta.org,pkumar2@delta.org,nahmed@delta.org"
     //Application type
