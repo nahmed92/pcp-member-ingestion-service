@@ -223,7 +223,7 @@ pipeline {
 
 
 
-    		stage('Deploy -PIT')
+    	/*stage('Deploy -PIT')
 		{
 			environment {
 				DEPLOYMENT_ENVIRONMENT = 'PIT'
@@ -308,7 +308,7 @@ pipeline {
 					}
 				}
 			}
-		}
+		}*/
 		stage('Deploy - MOT')
 		{
 			environment {
@@ -369,7 +369,7 @@ pipeline {
 			}
 		}
 
-		stage('Test Automation- MOT')
+		/*stage('Test Automation- MOT')
 		{
 			environment{
 				DEPLOYMENT_ENVIRONMENT = 'MOT'
@@ -395,7 +395,7 @@ pipeline {
 					}
 				}
 			}
-		}
+		}*/
 
 		stage('Create CM Record-PROD') {
 			environment{
