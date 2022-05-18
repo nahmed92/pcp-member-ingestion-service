@@ -136,7 +136,7 @@ pipeline {
 				}
 			}
 		}
-		stage('Test Automation- DIT')
+		/*stage('Test Automation- DIT')
 		{
 			environment{
 				DEPLOYMENT_ENVIRONMENT = 'DIT'
@@ -148,7 +148,7 @@ pipeline {
 					echo "DIT Testing"
 					}
 			}
-		}
+		}*/
 	    stage('Pre Deployment ') {
 			parallel {
 				stage('Create Build Note') {
@@ -171,7 +171,8 @@ pipeline {
 						script {
 							def parameterMap=new HashMap();
 							def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
-							def ApplicationArea="GMMO"
+							ApplicationArea="Provider Services" 
+							APP="ps-refdata-rd-service"
 							parameterMap.put("PROJECT","CM");
 							parameterMap.put("TAG",tag);
 							parameterMap.put("APP",APP);
@@ -222,7 +223,7 @@ pipeline {
 
 
 
-    		stage('Deploy -PIT')
+    	/*stage('Deploy -PIT')
 		{
 			environment {
 				DEPLOYMENT_ENVIRONMENT = 'PIT'
@@ -236,6 +237,8 @@ pipeline {
 				script {
 					def parameterMap=new HashMap();
 					def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
+					ApplicationArea="Provider Services"
+					APP="ps-refdata-rd-service"
 					parameterMap.put("PROJECT","CM");
 					parameterMap.put("TAG",tag);
 					parameterMap.put("APP",APP);
@@ -305,7 +308,7 @@ pipeline {
 					}
 				}
 			}
-		}
+		}*/
 		stage('Deploy - MOT')
 		{
 			environment {
@@ -319,6 +322,8 @@ pipeline {
 		   		checkpoint 'Deploy - MOT';
 				script {
 					def parameterMap=new HashMap();
+					ApplicationArea="Provider Services"
+					APP="ps-refdata-rd-service"
 					def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
 					parameterMap.put("PROJECT","CM");
 					parameterMap.put("TAG",tag);
@@ -364,7 +369,7 @@ pipeline {
 			}
 		}
 
-		stage('Test Automation- MOT')
+		/*stage('Test Automation- MOT')
 		{
 			environment{
 				DEPLOYMENT_ENVIRONMENT = 'MOT'
@@ -390,7 +395,7 @@ pipeline {
 					}
 				}
 			}
-		}
+		}*/
 
 		stage('Create CM Record-PROD') {
 			environment{
@@ -402,6 +407,8 @@ pipeline {
 				checkpoint 'Create CM Record-PROD';
 				script {
 					CMIMPLEMENTOR=input(message: "Do you want to promote build to Higher Enviornment , click PROCEED or ABORT ?", submitterParameter: 'approver')
+					ApplicationArea="Provider Services"
+					APP="ps-refdata-rd-service"
             		def parameterMap=new HashMap();
 					parameterMap.put("PROJECT","CM");
            	 		parameterMap.put("APP","${APP}");
@@ -537,9 +544,9 @@ pipeline {
 	SCANNER_HOME= tool 'SonarQubeScanner'
     //Application Area  and App as defined in Jira Change Management Project
 
-	ApplicationArea=""
-    APP=""
-    //team Dl and Release Management Team
+	ApplicationArea="Provider Services"
+	APP="ps-refdata-rd-service"
+	//team Dl and Release Management Team
 	SEND_MAIL = "ITSSReleaseTeam@delta.org,KBasireddy@delta.org,skalahasthi2@delta.org,pkumar2@delta.org,nahmed@delta.org"
     //Application type
 		SERVICE_TYPE="JAVA"
