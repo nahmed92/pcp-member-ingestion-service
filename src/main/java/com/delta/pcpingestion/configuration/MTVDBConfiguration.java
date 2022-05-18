@@ -21,24 +21,24 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Configuration
-@EnableTransactionManagement
-  @EnableJpaRepositories(entityManagerFactoryRef = "mtvEntityManagerFactory",
-  transactionManagerRef = "mtvTransactionManager", basePackages = {
-  "com.delta.pcpingestion.mtv.repo" })
+//@Configuration
+//@EnableTransactionManagement
+//  @EnableJpaRepositories(entityManagerFactoryRef = "mtvEntityManagerFactory",
+//  transactionManagerRef = "mtvTransactionManager", basePackages = {
+//  "com.delta.pcpingestion.mtv.repo" })
 @Slf4j
 public class MTVDBConfiguration {
 	
 	@Autowired
     private Environment env;
 
-	@Bean(name = "orcaleDataSource")
-	@ConfigurationProperties(prefix = "metavance.database")
+//	@Bean(name = "orcaleDataSource")
+//	@ConfigurationProperties(prefix = "metavance.database")
 	public DataSource orcaleDataSource() {
 		return DataSourceBuilder.create().build();
 	}
 
-	@Bean(name = "mtvEntityManagerFactory")
+	// @Bean(name = "mtvEntityManagerFactory")
 	public LocalContainerEntityManagerFactoryBean mtvEntityManagerFactoryBean(EntityManagerFactoryBuilder builder,
 			@Qualifier("orcaleDataSource") DataSource dataSource) {
 		Properties properties = new Properties();
@@ -61,13 +61,13 @@ public class MTVDBConfiguration {
 		return emf;
 	}
 
-	@Bean(name = "mtvTransactionManager")
+//	@Bean(name = "mtvTransactionManager")
 	public PlatformTransactionManager mtvTransactionManager(
 			final @Qualifier("mtvEntityManagerFactory") LocalContainerEntityManagerFactoryBean mtvEntityManagerFactoryBean) {
 		return new JpaTransactionManager(mtvEntityManagerFactoryBean.getObject());
 	}
 
-	@Bean(name = "mtvJdbcTemplate")
+//	@Bean(name = "mtvJdbcTemplate")
 	public JdbcTemplate mtvJdbcTemplate(@Qualifier("orcaleDataSource") DataSource dataSource) {
 		return new JdbcTemplate(dataSource);
 	}

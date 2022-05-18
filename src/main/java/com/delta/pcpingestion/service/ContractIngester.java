@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
+import com.delta.pcpingestion.mapper.Mapper;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 
@@ -31,7 +31,10 @@ public class ContractIngester {
 	private TibcoClient tibcoClient;
 
 	@Autowired
-	private ContractRepository repository;
+	private ContractRepository repo;
+
+	@Autowired
+	private Mapper mapper;
 
 	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MMM-yy");
 
@@ -60,13 +63,10 @@ public class ContractIngester {
 			List<ContractEntity> contractEntities = tibcoClient.fetchContracts(params);
 			log.debug("Member Receive {}", contractEntities);
 			if (CollectionUtils.isNotEmpty(contractEntities)) {
-				List<ContractEntity> entitiesToSave = contractEntities.stream()
-						.filter(i -> isAllowedToSave(i)).collect(Collectors.toList());
-
-				if (CollectionUtils.isNotEmpty(entitiesToSave)) {
-					repository.saveAll(entitiesToSave);
+				for (ContractEntity entity : contractEntities) {
+					save(entity);
 				}
-				log.info("Contract is staged... {} ", entitiesToSave.size());
+				log.info("Contract is staged... {} ", contractEntities.size());
 
 			} else {
 				log.info("There is no contract to save..");
@@ -78,22 +78,41 @@ public class ContractIngester {
 	}
 
 	// Setting Id for contract
-	private boolean isAllowedToSave(ContractEntity contract) {
-		boolean returnValue = false;
-		Optional<ContractEntity> optionalContractEntity = repository.findByContractId(contract.getContractId());
+	private void save(ContractEntity contract) {
+		log.info("START ContractIngester.save()");
+
+		Optional<ContractEntity> optionalContractEntity = repo.findByContractId(contract.getContractId());
 		if (optionalContractEntity.isEmpty()) {
 			contract.setId(UUID.randomUUID().toString());
-			returnValue = true;
+			log.info("Saving contract {}", contract);
+			repo.save(contract);
 		} else {
-			LocalDate lastUpdateDate = optionalContractEntity.get().getLastUpdatedAt().toLocalDateTime().toLocalDate();
-			LocalDate date = lastUpdateDate.plusDays(7);
-			returnValue = (date.isBefore(LocalDate.now())) ? true : false;
-			if(returnValue) {
-				contract.setId(optionalContractEntity.get().getId());
-			}
+
+			ContractEntity dbContract = optionalContractEntity.get();
+			mergeAndSave(dbContract, contract);
 		}
-		log.info("for contractId {}, isAllowdTosave:{} ", contract.getContractId(), returnValue);
-		return returnValue;
+
+		log.info("END ContractIngester.save()");
+
+	}
+
+	private void mergeAndSave(ContractEntity dbContractEntity, ContractEntity contractEntity) {
+		log.info("START ContractIngester.mergeAndSave()");
+
+		ContractEntity mergedEntity = mapper.merge(dbContractEntity, contractEntity);
+
+		repo.save(mergedEntity);
+		/*
+		 * LocalDate lastUpdateDate =
+		 * dbContractEntity.getLastUpdatedAt().toLocalDateTime().toLocalDate(); // TODO
+		 * : externalize this days property LocalDate date = lastUpdateDate.plusDays(7);
+		 * boolean updateFlag = (date.isBefore(LocalDate.now())) ? true : false;
+		 * if(updateFlag) {
+		 * 
+		 * }
+		 */
+
+		log.info("END ContractIngester.mergeAndSave()");
 	}
 
 }
