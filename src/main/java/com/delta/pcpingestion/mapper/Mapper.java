@@ -1,13 +1,15 @@
 package com.delta.pcpingestion.mapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +38,79 @@ public class Mapper {
 		return memberContract;
 	}
 
-	private ContractEntity map(Contract contract) {
+	public ContractEntity merge(ContractEntity dbContractEntity, ContractEntity contractEntity) {
+
+		Contract dbContract = convertToContract(dbContractEntity.getContractJson());
+
+		Contract contract = convertToContract(contractEntity.getContractJson());
+
+		Contract mergedContract = merge(dbContract, contract);
+
+		ContractEntity mergedContractEntity = null;
+
+		if (mergedContract != null) {
+			mergedContractEntity = map(mergedContract);
+
+			mergedContractEntity.setId(dbContractEntity.getId());
+		}
+		return mergedContractEntity;
+	}
+
+	private Contract merge(Contract dbContract, Contract contract) {
+
+		if (StringUtils.equals(dbContract.getContractID(), contract.getContractID())) {
+
+			if (CollectionUtils.isNotEmpty(contract.getEnrollees())) {
+				for (Enrollee enrollee : contract.getEnrollees()) {
+					merge(dbContract, enrollee);
+				}
+			}
+		}
+		return dbContract;
+	}
+
+	private void merge(Contract dbContract, Enrollee enrollee) {
+
+		List<Enrollee> dbEnrollees = dbContract.getEnrollees();
+		if (CollectionUtils.isNotEmpty(dbEnrollees)) {
+			dbEnrollees = new ArrayList<>();
+			dbEnrollees.add(enrollee);
+			return;
+		}
+		for (Enrollee e : dbEnrollees) {
+			if (StringUtils.equals(e.getMemberId(), enrollee.getMemberId())) {
+				// merge claims;
+				merge(e, enrollee.getClaims());
+
+				return;
+			}
+		}
+		dbEnrollees.add(enrollee);
+	}
+
+	private void merge(Enrollee e, List<Claim> claims) {
+		if (CollectionUtils.isEmpty(e.getClaims())) {
+			e.setClaims(claims);
+			return;
+		}
+		if (CollectionUtils.isNotEmpty(claims)) {
+			for (Claim claim : claims) {
+				merge(e, claim);
+			}
+		}
+	}
+
+	private void merge(Enrollee e, Claim claim) {
+
+		for (Claim c : e.getClaims()) {
+			if (StringUtils.equals(c.getClaimId(), claim.getClaimId())) {
+				return;
+			}
+		}
+		e.getClaims().add(claim);
+	}
+
+	public ContractEntity map(Contract contract) {
 		ContractEntity entity = ContractEntity.builder() //
 				.publishStatus(PublishStatus.STAGED) //
 				.numOfRetries(0) //
@@ -45,7 +119,7 @@ public class Mapper {
 		Set<String> stateCodes = new HashSet<>();
 		Set<String> mtvPersionIds = new HashSet<>();
 		Set<String> claimIds = new HashSet<>();
-        
+
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			mtvPersionIds.add(enrollee.getMtvPersonID());
 			for (Claim claim : enrollee.getClaims()) {
@@ -75,7 +149,7 @@ public class Mapper {
 		return contractStr;
 	}
 
-	public Contract map(final String contractString) {
+	public Contract convertToContract(final String contractString) {
 		Contract contract = null;
 		try {
 			contract = objectMapper.readValue(contractString.getBytes(), Contract.class);
@@ -90,7 +164,7 @@ public class Mapper {
 
 		List<MemberContractClaimRequest> requestList = new LinkedList<>();
 
-		Contract contract = map(contractEntity.getContractJson());
+		Contract contract = convertToContract(contractEntity.getContractJson());
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			for (Claim claim : enrollee.getClaims()) {
