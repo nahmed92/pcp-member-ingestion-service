@@ -544,9 +544,9 @@ pipeline {
 	SCANNER_HOME= tool 'SonarQubeScanner'
     //Application Area  and App as defined in Jira Change Management Project
 
-	ApplicationArea="GMMO"
-    APP="gmmo-dcu-cu"
-    //team Dl and Release Management Team
+	ApplicationArea="Provider Services"
+	APP="ps-refdata-rd-service"
+	//team Dl and Release Management Team
 	SEND_MAIL = "ITSSReleaseTeam@delta.org,KBasireddy@delta.org,skalahasthi2@delta.org,pkumar2@delta.org,nahmed@delta.org"
     //Application type
 		SERVICE_TYPE="JAVA"
