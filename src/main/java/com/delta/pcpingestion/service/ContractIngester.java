@@ -86,6 +86,7 @@ public class ContractIngester {
 			returnValue = true;
 		} else {
 			LocalDate lastUpdateDate = optionalContractEntity.get().getLastUpdatedAt().toLocalDateTime().toLocalDate();
+			// TODO : externalize this days property
 			LocalDate date = lastUpdateDate.plusDays(7);
 			returnValue = (date.isBefore(LocalDate.now())) ? true : false;
 			if(returnValue) {

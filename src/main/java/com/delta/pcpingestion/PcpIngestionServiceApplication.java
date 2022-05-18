@@ -4,9 +4,12 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.util.List;import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -18,6 +21,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
+
+import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 

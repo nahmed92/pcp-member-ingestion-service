@@ -54,12 +54,12 @@ public class IngestionService {
 		log.info("START PCPIngestionService.ingestFromTibco()");
 		String lookbackDays = configClient.providerLookBackDays();
 		LocalDate cutOffDate = LocalDate.now().minusDays(Integer.parseInt(lookbackDays));
-		for (State state : State.values()) {
-			executor.submit(() -> {
-				ingestFromTibco(state, cutOffDate, numOfDays);
+		//for (State state : State.values()) {
+		//	executor.submit(() -> {
+				ingestFromTibco(State.NY, cutOffDate, numOfDays);
 
-			});
-		}
+		//	});
+		//}
 		log.info("END PCPIngestionService.ingestFromTibco()");
 	}
 
