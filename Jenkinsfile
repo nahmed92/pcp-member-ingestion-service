@@ -136,7 +136,7 @@ pipeline {
 				}
 			}
 		}
-		stage('Test Automation- DIT')
+		/*stage('Test Automation- DIT')
 		{
 			environment{
 				DEPLOYMENT_ENVIRONMENT = 'DIT'
@@ -148,7 +148,7 @@ pipeline {
 					echo "DIT Testing"
 					}
 			}
-		}
+		}*/
 	    stage('Pre Deployment ') {
 			parallel {
 				stage('Create Build Note') {
