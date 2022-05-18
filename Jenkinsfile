@@ -171,8 +171,8 @@ pipeline {
 						script {
 							def parameterMap=new HashMap();
 							def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
-							def ApplicationArea="GMMO"
-							def APP="gmmo-dcu-cu"
+							ApplicationArea="Provider Services" 
+							APP="ps-refdata-rd-service"
 							parameterMap.put("PROJECT","CM");
 							parameterMap.put("TAG",tag);
 							parameterMap.put("APP",APP);
@@ -237,8 +237,8 @@ pipeline {
 				script {
 					def parameterMap=new HashMap();
 					def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
-					def ApplicationArea="GMMO"
-					def APP="gmmo-dcu-cu"
+					ApplicationArea="Provider Services"
+					APP="ps-refdata-rd-service"
 					parameterMap.put("PROJECT","CM");
 					parameterMap.put("TAG",tag);
 					parameterMap.put("APP",APP);
@@ -322,8 +322,8 @@ pipeline {
 		   		checkpoint 'Deploy - MOT';
 				script {
 					def parameterMap=new HashMap();
-					def ApplicationArea="GMMO"
-					def APP="gmmo-dcu-cu"
+					ApplicationArea="Provider Services"
+					APP="ps-refdata-rd-service"
 					def tag=DOCKER_REGISTRY+"/"+JOB_NAME+":"+SERVICE+"_"+BRANCH_NAME+"_"+BUILD_NUMBER
 					parameterMap.put("PROJECT","CM");
 					parameterMap.put("TAG",tag);
@@ -407,8 +407,8 @@ pipeline {
 				checkpoint 'Create CM Record-PROD';
 				script {
 					CMIMPLEMENTOR=input(message: "Do you want to promote build to Higher Enviornment , click PROCEED or ABORT ?", submitterParameter: 'approver')
-					def ApplicationArea="GMMO"
-					def APP="gmmo-dcu-cu"
+					ApplicationArea="Provider Services"
+					APP="ps-refdata-rd-service"
             		def parameterMap=new HashMap();
 					parameterMap.put("PROJECT","CM");
            	 		parameterMap.put("APP","${APP}");
