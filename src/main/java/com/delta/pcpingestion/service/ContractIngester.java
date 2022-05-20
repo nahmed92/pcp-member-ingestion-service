@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.mapper.Mapper;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
+import com.google.common.base.Stopwatch;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,8 +58,10 @@ public class ContractIngester {
 
 	private void ingestAndPersist(State state, Map<String, String> params) {
 		log.info("START ContractIngester.ingestAndPersist()");
+		Stopwatch  stopwatch = Stopwatch.createStarted();
 		int pagenum = 0;
 		Boolean isMorerecods = Boolean.TRUE;
+		int totalNumberOfRecords = 0;
 		while (isMorerecods) {
 			params.put("pagenum", "" + pagenum);
 			List<ContractEntity> contractEntities = tibcoClient.fetchContracts(params);
@@ -66,7 +70,7 @@ public class ContractIngester {
 				for (ContractEntity entity : contractEntities) {
 					save(entity);
 				}
-				log.info("Contract is staged... {} ", contractEntities.size());
+				totalNumberOfRecords +=  contractEntities.size();
 
 			} else {
 				log.info("There is no contract to save..");
@@ -74,6 +78,9 @@ public class ContractIngester {
 			}
 			pagenum = pagenum + 1;
 		}
+		stopwatch.stop();
+		log.info("For State {}, params {} , TotalNumberOfRecords {} , completed in sec {} ",state,params,totalNumberOfRecords,stopwatch.elapsed(TimeUnit.SECONDS));
+		
 		log.info("END ContractIngester.ingestAndPersist()");
 	}
 

@@ -39,10 +39,10 @@ public class PCPConfigServiceClient {
 	private RestTemplate restTemplate;
 	
 	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.config.service.retry.maxattempts:3}")
-	public String providerLookBackDays() {
-		log.info("START PCPConfigService.providerLookaheadDays");
-		String providerLookaheadDaysEndPoint = pcpConfigServiceEndpoint.concat(PCPConfigServiceConstants.CLAIM_LOOKBACK_DAYS);
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(providerLookaheadDaysEndPoint);
+	public String claimLookBackDays() {
+		log.info("START PCPConfigService.claimLookBackDays");
+		String claimLookBackDaysEndPoint = pcpConfigServiceEndpoint.concat(PCPConfigServiceConstants.CLAIM_LOOKBACK_DAYS);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(claimLookBackDaysEndPoint);
 		String uriBuilder = builder.build().encode().toUriString();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -58,7 +58,7 @@ public class PCPConfigServiceClient {
 		if(responseEntity.getStatusCode() == HttpStatus.OK) {
 			return responseEntity.getBody();
 		} 
-		log.info("END PCPConfigService.providerLookaheadDays");
+		log.info("END PCPConfigService.claimLookBackDays");
 		return responseEntity.getBody();
 	}
 	
