@@ -263,7 +263,7 @@ pipeline {
 						}
 				}
 				script {
-					rundeckLibrary.deployBlueGreen("$PIT_SECONDARY_BATCH_JOB","$PIT_PRIMARY_BATCH_JOB","$PIT_PRIMARY_SECONDARY_UP_BATCH_JOB")
+					rundeckLibrary.deployBlueGreen("$PIT_SECONDARY_MS_JOB","$PIT_PRIMARY_MS_JOB","$PIT_PRIMARY_SECONDARY_UP_MS_JOB")
 				}
 			}
 			post{
@@ -349,7 +349,7 @@ pipeline {
 					}
 				}
 				script {
-				    rundeckLibrary.deployBlueGreen("$MOT_SECONDARY_BATCH_JOB","$MOT_PRIMARY_BATCH_JOB","$MOT_PRIMARY_SECONDARY_UP_BATCH_JOB")
+				    rundeckLibrary.deployBlueGreen("$MOT_SECONDARY_MS_JOB","$MOT_PRIMARY_MS_JOB","$MOT_PRIMARY_SECONDARY_UP_MS_JOB")
 				}
 			}
 			post{
