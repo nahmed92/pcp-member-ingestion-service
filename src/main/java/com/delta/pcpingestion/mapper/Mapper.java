@@ -72,7 +72,7 @@ public class Mapper {
 	private void merge(Contract dbContract, Enrollee enrollee) {
 
 		List<Enrollee> dbEnrollees = dbContract.getEnrollees();
-		if (CollectionUtils.isNotEmpty(dbEnrollees)) {
+		if (CollectionUtils.isEmpty(dbEnrollees)) {
 			dbEnrollees = new ArrayList<>();
 			dbEnrollees.add(enrollee);
 			return;
