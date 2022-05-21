@@ -46,6 +46,7 @@ public class ContractIngester {
 		Map<String, String> params = new HashMap<>();
 		LocalDate processDate = LocalDate.now();
 		log.info("Start process for [" + state + "] for cutOffDate[" + cutOffDate + "]");
+		Stopwatch stopwatch = Stopwatch.createStarted();
 		while (cutOffDate.isBefore(processDate)) {
 			params.put("state", "\"" + state.toString() + "\"");
 			params.put("numofdays", numOfDays.toString());
@@ -53,6 +54,8 @@ public class ContractIngester {
 			ingestAndPersist(state, params);
 			processDate = processDate.minusDays(numOfDays);
 		}
+		stopwatch.stop();
+		log.info("Completed ingestion for state {},CutOffDate {},numOfDays {}, in {}  seconds ",state,cutOffDate,numOfDays, stopwatch.elapsed(TimeUnit.SECONDS));
 		log.info("END ContractIngester.ingestByState()");
 	}
 
