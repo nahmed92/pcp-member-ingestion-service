@@ -20,6 +20,7 @@ import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -44,12 +45,13 @@ public class IngestionService {
 	@PostConstruct
 	public void init() {
 		 
-		ThreadFactory tf = new ThreadFactoryBuilder().setNameFormat("ingestion-thread-%d").build();
+		ThreadFactory tf = new ThreadFactoryBuilder().setNameFormat("Ingestion-tp-%d").build();
 		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount, tf);
 		
 	}
 
 	@MethodExecutionTime
+	@Synchronized
 	public void ingest() {
 		log.info("START PCPIngestionService.ingest()");
 

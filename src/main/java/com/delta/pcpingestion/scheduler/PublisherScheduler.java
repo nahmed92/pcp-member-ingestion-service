@@ -16,7 +16,7 @@ public class PublisherScheduler {
 	@Autowired
 	private PublisherService publisherService;
 
-	@Scheduled(initialDelayString = "${job.post.contract.tocalculation.initial.delay}", fixedRateString = "${job.post.contract.tocalculation.fixed.delay}")
+	@Scheduled(cron = "${job.publisher.cron.scheduler}")
 	@MethodExecutionTime
 	public void schedulePostContractDataOnPCPCalculationFixedRateTask() {
 		log.info("START PublisherScheduler.schedulePostContractDataOnPCPCalculationFixedRateTask()");

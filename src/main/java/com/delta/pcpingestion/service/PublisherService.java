@@ -3,6 +3,7 @@ package com.delta.pcpingestion.service;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.PostConstruct;
 
@@ -19,7 +20,9 @@ import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
 import com.delta.pcpingestion.mapper.Mapper;
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -49,10 +52,12 @@ public class PublisherService {
 
 	@PostConstruct
 	public void init() {
-		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount);
+		ThreadFactory tf = new ThreadFactoryBuilder().setNameFormat("Publisher-tp-%d").build();
+		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount, tf);
 	}
 
 	@MethodExecutionTime
+	@Synchronized
 	public void publish() {
 		log.info("START PublisherService.publish()");
 
@@ -67,10 +72,12 @@ public class PublisherService {
 	private void publish(State state) {
 		log.info("START PublisherService.publish()");
 
-		log.info("Start Publish records for state {}", state);
+		log.info("Start Publishing records for state {}", state);
 		List<ContractEntity> contractClaims = repository.findByPublishStatusAndStateCode(PublishStatus.STAGED.name(), state.name());
 
 		publish(contractClaims);
+		
+		log.info("Start Publishing records for state {},count {}", state,contractClaims.size() );
 
 		log.info("END PublisherService.publish()");
 	}

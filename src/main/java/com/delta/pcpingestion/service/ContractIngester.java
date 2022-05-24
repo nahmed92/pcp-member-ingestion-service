@@ -82,7 +82,7 @@ public class ContractIngester {
 			pagenum = pagenum + 1;
 		}
 		stopwatch.stop();
-		log.info("For State {}, params {} , TotalNumberOfRecords {} , completed in sec {} ",state,params,totalNumberOfRecords,stopwatch.elapsed(TimeUnit.SECONDS));
+		log.info("Completed State {}, params {} , TotalNumberOfRecords {}, pages {} , completed in sec {} ",state,params,totalNumberOfRecords,pagenum,stopwatch.elapsed(TimeUnit.SECONDS));
 		
 		log.info("END ContractIngester.ingestAndPersist()");
 	}

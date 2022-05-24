@@ -61,6 +61,8 @@ ENTRYPOINT java $JAVA_OPTS \
     -Dpcp.config.service.endpoint=${PCP_CONFIG_SERVICE_ENDPOINT} \
     -Dpcp.tibco.service.retry.maxattempts=${PCP_TIBCO_SERVICE_RETRY_MAXATTEMPTS}\
     -Dpcp.calculation.service.retry.maxattempts=${PCP_CALCULATION_SERVICE_RETRY_MAXATTEMPTS}\
+    -Djob.ingester.cron.scheduler=${JOB_INGESTER_CRON_SCHEDULER} \
+    -Djob.publisher.cron.scheduler=${JOB_PUBLISHER_CRON_SCHEDULER} \
     -Djob.pcp.contract.initial.delay=${JOB_PCP_CONTRACT_INITIAL_DELAY} \
     -Djob.pcp.contract.fixed.delay=${JOB_PCP_CONTRACT_FIXED_DELAY} \
     -Djob.post.contract.tocalculation.initial.delay=${JOB_POST_CONTRACT_TO_CALCULATON_INITIAL_DELAY} \
