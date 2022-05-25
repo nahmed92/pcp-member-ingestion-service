@@ -8,7 +8,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.transaction.Transactional;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Data
 @Entity
@@ -44,7 +42,7 @@ public class ContractEntity implements java.io.Serializable {
 
 	@Column(name = "mtv_person_ids")
 	private String mtvPersonIds;
-		
+
 	@Column(name = "claims_ids")
 	private String claimIds;
 
