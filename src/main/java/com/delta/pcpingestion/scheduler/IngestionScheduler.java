@@ -22,7 +22,7 @@ public class IngestionScheduler {
 	@Autowired
 	private IngestionService ingestionService;
 
-	@Scheduled(cron = "${job.ingester.cron.scheduler:*/30 * * * *}")
+	@Scheduled(cron = "${job.ingester.cron.scheduler:*/30 * * * * *}")
 	@MethodExecutionTime
 	public void scheduleIngest() {
 		log.info("START IngestionScheduler.scheduleIngest()");
