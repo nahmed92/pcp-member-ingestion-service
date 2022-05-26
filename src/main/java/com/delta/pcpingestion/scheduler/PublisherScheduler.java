@@ -16,7 +16,7 @@ public class PublisherScheduler {
 	@Autowired
 	private PublisherService publisherService;
 
-	@Scheduled(cron = "${job.publisher.cron.scheduler:*/30 * * * * *}")
+	@Scheduled(cron = "*/30 * * * * *")
 	@MethodExecutionTime
 	public void schedulePostContractDataOnPCPCalculationFixedRateTask() {
 		log.info("START PublisherScheduler.schedulePostContractDataOnPCPCalculationFixedRateTask()");
