@@ -36,7 +36,8 @@ public class TibcoClient {
 	@Value("${pcp.ingestion.service.basicAuthPassword}")
 	private String basicAuthPassword;
 
-	private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
+	//private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
+	private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numberOfDays},\"receiveddate\":\"${receivedDate}\",\"pagenum\":${pageNumber}}'}";
 
 	@Autowired
 	private RestTemplate restTemplate;
