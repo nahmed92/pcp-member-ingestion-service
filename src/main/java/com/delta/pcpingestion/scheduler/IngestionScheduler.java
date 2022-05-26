@@ -17,18 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class IngestionSchedular {
+public class IngestionScheduler {
 
 	@Autowired
 	private IngestionService ingestionService;
 
-	@Scheduled(initialDelayString = "${job.pcp.contract.initial.delay}", fixedRateString = "${job.pcp.contract.fixed.delay}")
+	@Scheduled(cron = "*/30 * * * * *")
 	@MethodExecutionTime
 	public void scheduleIngest() {
-		log.info("START IngestionSchedular.scheduleIngest()");
+		log.info("START IngestionScheduler.scheduleIngest()");
 	
 		ingestionService.ingest();
 
-		log.info("END IngestionSchedular.scheduleIngest()");
+		log.info("END IngestionScheduler.scheduleIngest()");
 	}
 }

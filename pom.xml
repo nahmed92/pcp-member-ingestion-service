@@ -165,7 +165,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				 <configuration>    
-                   <mainClass>com.delta.pcpingestion.PcpIngestionServiceApplication</mainClass>
+                   <mainClass>com.delta.pcpingestion.App</mainClass>
                 </configuration>
 			</plugin>
 			<!-- Jacoco integration test plugin -->
