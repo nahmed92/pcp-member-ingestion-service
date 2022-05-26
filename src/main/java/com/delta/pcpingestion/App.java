@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.delta.pcpingestion.*" })
 @EnableScheduling
+@EnableAsync
 @Slf4j
 public class App {
 

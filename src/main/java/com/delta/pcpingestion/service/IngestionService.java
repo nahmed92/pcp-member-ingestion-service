@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,7 @@ public class IngestionService {
 	}
 
 	@MethodExecutionTime
-	@Synchronized
+	@Async
 	public void ingest() {
 		log.info("START PCPIngestionService.ingest()");
 
@@ -60,6 +61,8 @@ public class IngestionService {
 		log.info("END PCPIngestionService.ingest()");
 	}
 
+	@MethodExecutionTime
+	@Synchronized
 	public void ingestFromTibco() {
 		log.info("START PCPIngestionService.ingestFromTibco()");
 		String lookbackDays = configClient.claimLookBackDays();
