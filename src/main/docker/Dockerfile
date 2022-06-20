@@ -68,4 +68,5 @@ ENTRYPOINT java $JAVA_OPTS \
     -Djob.post.contract.tocalculation.initial.delay=${JOB_POST_CONTRACT_TO_CALCULATON_INITIAL_DELAY} \
     -Djob.post.contract.tocalculation.fixed.delay=${JOB_POST_CONTRACT_TO_CALCULATON_FIXED_DELAY} \
     -Denvironment=${ENVIRONMENT} \
+    -Djavax.net.ssl.trustStore=/usr/java/latest/jre/lib/security/cacerts \
     -jar /pcp-member-ingestion-service-1.0.0.jar
