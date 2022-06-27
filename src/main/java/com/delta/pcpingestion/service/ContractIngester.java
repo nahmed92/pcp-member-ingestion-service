@@ -38,7 +38,7 @@ public class ContractIngester {
 	@Autowired
 	private Mapper mapper;
 
-	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MMM-yy");
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
 	@MethodExecutionTime
 	public void ingestByState(State state, LocalDate cutOffDate, Integer numOfDays) {

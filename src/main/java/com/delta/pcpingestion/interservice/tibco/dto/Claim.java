@@ -19,10 +19,10 @@ public class Claim {
 
 	private String billProviderSpeciality;
 
-	@JsonFormat(pattern="dd-MMM-yy") //FIXME: change format to yyyy
+	@JsonFormat(pattern="MM-dd-yyyy")
 	private Date receivedDate; 
 
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern="MM-dd-yyy HH:mm:ss")
 	private Date resolvedDate;
 
 	private String serviceNumber;
@@ -35,5 +35,5 @@ public class Claim {
 	
 	private String stateCode;
 	
-	private String securityGroupId;
+	private String groupNumber;
 }
