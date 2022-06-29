@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -88,7 +89,7 @@ public class PublisherService {
 		if (!contractClaims.isEmpty()) {
 			executor.submit(() -> {
 				// FIXME: Partition request
-				contractClaims.stream().forEach(contract -> publish(contract));
+				contractClaims.stream().forEach(this::publish);
 			});
 
 		}
@@ -99,8 +100,13 @@ public class PublisherService {
 	private void publish(ContractEntity contract) { // multiple contracts?
 		log.info("START PublisherService.publish()");
 		List<MemberContractClaimRequest> requests = mapper.mapRequest(contract);
-		pcpCalculationClient.publish(requests);
-		contract.setPublishStatus(PublishStatus.COMPLETED);
+		if(CollectionUtils.isNotEmpty(requests)) {
+			pcpCalculationClient.publish(requests);
+			contract.setPublishStatus(PublishStatus.COMPLETED);
+		} else {
+			log.warn("Not publishing for contract {} ", contract);
+			contract.setPublishStatus(PublishStatus.INVALID_PROVIDER);
+		}		
 		repository.save(contract);
 		log.info("END PublisherService.publish()");
 	}
