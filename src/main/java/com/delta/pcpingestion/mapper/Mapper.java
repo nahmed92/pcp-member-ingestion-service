@@ -39,7 +39,7 @@ public class Mapper {
 	}
 
 	public ContractEntity merge(ContractEntity dbContractEntity, ContractEntity contractEntity) {
-
+		log.info("START Mapper.merge");
 		Contract dbContract = convertToContract(dbContractEntity.getContractJson());
 
 		Contract contract = convertToContract(contractEntity.getContractJson());
@@ -52,7 +52,10 @@ public class Mapper {
 			mergedContractEntity = map(mergedContract);
 
 			mergedContractEntity.setId(dbContractEntity.getId());
+		} else  {
+			log.warn("Merge contract entity is null.");
 		}
+		log.info("END Mapper.merge");
 		return mergedContractEntity;
 	}
 

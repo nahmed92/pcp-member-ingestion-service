@@ -23,6 +23,7 @@ import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Stopwatch;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Scope("prototype")
@@ -88,7 +89,9 @@ public class ContractIngester {
 	}
 
 	// Setting Id for contract
-	private void save(ContractEntity contract) {
+	@MethodExecutionTime
+	@Transactional
+	public void save(ContractEntity contract) {
 		log.info("START ContractIngester.save()");
 
 		Optional<ContractEntity> optionalContractEntity = repo.findByContractId(contract.getContractId());
