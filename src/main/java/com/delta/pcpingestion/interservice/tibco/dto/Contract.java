@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class Contract {
 
-	private String contractID;
+	private String contractId;
 
 	private String groupNumber;
 
