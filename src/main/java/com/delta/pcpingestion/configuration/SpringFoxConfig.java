@@ -23,7 +23,7 @@ public class SpringFoxConfig implements WebMvcConfigurer {
 		return new Docket(DocumentationType.SWAGGER_2)
 				.apiInfo(apiInfo())
 				.select()
-				.apis(RequestHandlerSelectors.basePackage("com.deltadental.pcp.calculation.controller"))
+				.apis(RequestHandlerSelectors.basePackage("com.delta.pcpingestion.controller"))
 				.paths(PathSelectors.any())
 				.build();
 	}

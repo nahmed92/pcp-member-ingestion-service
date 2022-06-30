@@ -1,0 +1,86 @@
+{
+    "pcpMembers": {
+        "contracts": [
+            {
+                "contractId": "1193757981",
+                "enrollees": [
+                    {
+                        "memberId": "01",
+                        "mtvPersonId": "0739720505325875",
+                        "claims": [
+                            {
+                                "claimId": "20200906011925",
+                                "claimStatus": "Y",
+                                "receivedDate": "03-30-2020 00.00.01.000000",
+                                "resolvedDate": "03-30-2020 14.11.58.136847",
+                                "billingProviderId": "DC062540",
+                                "stateCode": "CA",
+                                "groupNumber": "79020"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "contractId": "1175958149",
+                "enrollees": [
+                    {
+                        "memberId": "02",
+                        "mtvPersonId": "0139161809172295",
+                        "claims": [
+                            {
+                                "claimId": "20200903000127",
+                                "claimStatus": "Y",
+                                "receivedDate": "03-30-2020 00.00.01.000000",
+                                "resolvedDate": "03-30-2020 10.10.37.827919",
+                                "billingProviderId": "DC006473",
+                                "stateCode": "CA",
+                                "groupNumber": "78980"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "contractId": "6960491607",
+                "enrollees": [
+                    {
+                        "memberId": "03",
+                        "mtvPersonId": "5100000000125368",
+                        "claims": [
+                            {
+                                "claimId": "202004019441681",
+                                "claimStatus": "Y",
+                                "receivedDate": "04-01-2020 00.00.00.000000",
+                                "resolvedDate": "04-01-2020 17.08.02.271630",
+                                "billingProviderId": "DC017145",
+                                "stateCode": "CA",
+                                "groupNumber": "72003"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "contractId": "1125876091",
+                "enrollees": [
+                    {
+                        "memberId": "01",
+                        "mtvPersonId": "0564132417240112",
+                        "claims": [
+                            {
+                                "claimId": "20200986010941",
+                                "claimStatus": "Y",
+                                "receivedDate": "04-07-2020 00.00.01.000000",
+                                "resolvedDate": "04-07-2020 14.03.18.502667",
+                                "billingProviderId": "DC058948",
+                                "stateCode": "CA",
+                                "groupNumber": "75842"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

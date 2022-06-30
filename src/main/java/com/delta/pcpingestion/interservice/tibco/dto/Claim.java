@@ -19,10 +19,10 @@ public class Claim {
 
 	private String billProviderSpeciality;
 
-	@JsonFormat(pattern="MM-dd-yyyy")
+	@JsonFormat(pattern="MM-dd-yyyy HH.mm.ss.SSSSSS")
 	private Date receivedDate; 
 
-	@JsonFormat(pattern="MM-dd-yyyy HH:mm:ss")
+	@JsonFormat(pattern="MM-dd-yyyy HH.mm.ss.SSSSSS")
 	private Date resolvedDate;
 
 	private String serviceNumber;
