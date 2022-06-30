@@ -1,13 +1,10 @@
 package com.delta.pcpingestion.service;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.enums.State;
+import com.delta.pcpingestion.interservice.tibco.TibcoClient;
+import com.delta.pcpingestion.repo.ContractDAO;
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,12 +19,13 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.delta.pcpingestion.entity.ContractEntity;
-import com.delta.pcpingestion.enums.State;
-import com.delta.pcpingestion.interservice.tibco.TibcoClient;
-import com.delta.pcpingestion.repo.ContractRepository;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
@@ -38,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class IngestionServiceTest {
 
 	@Mock
-	private ContractRepository repository;
+	private ContractDAO repository;
 
 	@Mock
 	private TibcoClient tibcoClient;
