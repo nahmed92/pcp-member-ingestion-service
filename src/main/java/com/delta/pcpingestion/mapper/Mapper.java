@@ -58,7 +58,7 @@ public class Mapper {
 
 	private Contract merge(Contract dbContract, Contract contract) {
 
-		if (StringUtils.equals(dbContract.getContractID(), contract.getContractID())) {
+		if (StringUtils.equals(dbContract.getContractId(), contract.getContractId())) {
 
 			if (CollectionUtils.isNotEmpty(contract.getEnrollees())) {
 				for (Enrollee enrollee : contract.getEnrollees()) {
@@ -121,7 +121,7 @@ public class Mapper {
 		Set<String> claimIds = new HashSet<>();
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
-			mtvPersionIds.add(enrollee.getMtvPersonID());
+			mtvPersionIds.add(enrollee.getMtvPersonId());
 			for (Claim claim : enrollee.getClaims()) {
 				stateCodes.add(claim.getStateCode());
 				claimIds.add(claim.getClaimId());
@@ -129,7 +129,7 @@ public class Mapper {
 		}
 		// setting contractId for validation if already not exist
 		// or save before one week
-		entity.setContractId(contract.getContractID());
+		entity.setContractId(contract.getContractId());
 		entity.setContractJson(convertIntoString(contract));
 		entity.setNumberOfEnrollee(contract.getEnrollees().size());
 		entity.setMtvPersonIds(String.join(",", mtvPersionIds));
@@ -168,7 +168,7 @@ public class Mapper {
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			for (Claim claim : enrollee.getClaims()) {
-				MemberContractClaimRequest request = map(contract.getContractID(), enrollee, claim);
+				MemberContractClaimRequest request = map(contract.getContractId(), enrollee, claim);
 				requestList.add(request);
 			}
 		}

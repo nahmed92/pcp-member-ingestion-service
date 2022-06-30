@@ -22,7 +22,7 @@ public class Enrollee {
 
 	private String product;
 
-	private String mtvPersonID;
+	private String mtvPersonId;
 
 	private MemberAddress memberAddress;
 
