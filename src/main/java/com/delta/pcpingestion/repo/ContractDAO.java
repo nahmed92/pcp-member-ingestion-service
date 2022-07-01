@@ -3,8 +3,8 @@ package com.delta.pcpingestion.repo;
 import com.delta.pcpingestion.entity.ContractAuditEntity;
 import com.delta.pcpingestion.entity.ContractAuditPK;
 import com.delta.pcpingestion.entity.ContractEntity;
-import com.delta.pcpingestion.entity.RevisionType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.delta.pcpingestion.enums.RevisionType;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,10 +37,12 @@ public class ContractDAO {
     }
 
     public void save(ContractEntity contractEntity){
+    	//FIXME: read max row instead of find all
         Optional<List<ContractAuditEntity>> auditEntityOpt = contractAuditRepository.findAllByContractId(contractEntity.getContractId());
-        Integer max = null;
+        int max = 0;
         if(auditEntityOpt.isPresent()) {
             max = auditEntityOpt.get().stream().mapToInt(c -> c.getContractAuditPK().getRevisionNumber()).max().getAsInt();
+            max++;
         }
         ContractAuditEntity contractAuditEntity =  buildContractAuditEntity(contractEntity, max);
         contractRepository.save(contractEntity);
@@ -48,10 +50,10 @@ public class ContractDAO {
         contractAuditRepository.save(contractAuditEntity);
     }
 
-    private ContractAuditEntity buildContractAuditEntity(ContractEntity contractEntity, Integer max) {
+    private ContractAuditEntity buildContractAuditEntity(ContractEntity contractEntity, int max) {
 
         ContractAuditEntity contractAuditEntity = ContractAuditEntity.builder().
-            contractAuditPK(ContractAuditPK.builder().id(contractEntity.getId()).revisionNumber(max != null ? max+1 : 0).build() )
+            contractAuditPK(ContractAuditPK.builder().id(contractEntity.getId()).revisionNumber(max).build() )
                 .contractId(contractEntity.getContractId())
                 .claimIds(contractEntity.getClaimIds())
                 .numOfRetries(contractEntity.getNumOfRetries())
@@ -62,7 +64,7 @@ public class ContractDAO {
                 .stateCodes(contractEntity.getStateCodes())
                 .createdAt(contractEntity.getCreatedAt())
                 .lastUpdatedAt(contractEntity.getLastUpdatedAt())
-                .revisionType(max == null ? RevisionType.CREATE : RevisionType.UPDATE)
+                .revisionType(max == 0 ? RevisionType.CREATE : RevisionType.UPDATE)
                 .build();
          return contractAuditEntity;
     }

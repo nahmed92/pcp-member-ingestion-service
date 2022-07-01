@@ -1,6 +1,8 @@
 package com.delta.pcpingestion.entity;
 
 import com.delta.pcpingestion.enums.PublishStatus;
+import com.delta.pcpingestion.enums.RevisionType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

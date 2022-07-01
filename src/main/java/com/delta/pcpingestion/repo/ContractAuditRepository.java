@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 @Transactional
 interface ContractAuditRepository extends JpaRepository<ContractAuditEntity, ContractAuditPK> {
+	
     Optional<List<ContractAuditEntity>> findAllByContractId(String contractId);
 
 }

@@ -14,7 +14,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ContractAuditPK implements Serializable {
 
-    @Column(name = "id")
+	private static final long serialVersionUID = -3091943002398095386L;
+
+	@Column(name = "id")
     private String id;
 
     @Column(name="revision_number")
