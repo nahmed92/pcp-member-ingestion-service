@@ -13,6 +13,7 @@ RUN sh -c 'touch /contrast.jar'
 ENV JAVA_OPTS=""
 ENTRYPOINT java $JAVA_OPTS \
     -javaagent:$APPD_ROOT/javaagent.jar \
+    -javaagent:/contrast.jar \
     -Dcontrast.dir=/opt/docker/logs/contrast \
 	-Dcontrast.override.appname=${SERVICE_NAME} \
 	-Dcontrast.enabled=${CONTRAST_ENABLED} \
