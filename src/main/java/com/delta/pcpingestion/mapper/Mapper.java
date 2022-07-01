@@ -1,6 +1,7 @@
 package com.delta.pcpingestion.mapper;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -138,6 +139,7 @@ public class Mapper {
 		entity.setMtvPersonIds(String.join(",", mtvPersionIds));
 		entity.setClaimIds(String.join(",", claimIds));
 		entity.setStateCodes(String.join(",", stateCodes));
+		entity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 		return entity;
 	}
 
