@@ -1,6 +1,7 @@
 package com.delta.pcpingestion.mapper;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,7 +40,7 @@ public class Mapper {
 	}
 
 	public ContractEntity merge(ContractEntity dbContractEntity, ContractEntity contractEntity) {
-
+		log.info("START Mapper.merge");
 		Contract dbContract = convertToContract(dbContractEntity.getContractJson());
 
 		Contract contract = convertToContract(contractEntity.getContractJson());
@@ -52,7 +53,10 @@ public class Mapper {
 			mergedContractEntity = map(mergedContract);
 
 			mergedContractEntity.setId(dbContractEntity.getId());
+		} else  {
+			log.warn("Merge contract entity is null.");
 		}
+		log.info("END Mapper.merge");
 		return mergedContractEntity;
 	}
 
@@ -135,6 +139,7 @@ public class Mapper {
 		entity.setMtvPersonIds(String.join(",", mtvPersionIds));
 		entity.setClaimIds(String.join(",", claimIds));
 		entity.setStateCodes(String.join(",", stateCodes));
+		entity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 		return entity;
 	}
 

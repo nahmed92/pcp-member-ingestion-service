@@ -223,7 +223,7 @@ pipeline {
 
 
 
-    	/*stage('Deploy -PIT')
+    	stage('Deploy -PIT')
 		{
 			environment {
 				DEPLOYMENT_ENVIRONMENT = 'PIT'
@@ -282,7 +282,7 @@ pipeline {
 				}
 			}
 		}
-
+		/*
 		stage('Test Automation- PIT')
 		{
 			environment{

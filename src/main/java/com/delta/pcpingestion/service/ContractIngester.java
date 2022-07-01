@@ -8,6 +8,7 @@ import com.delta.pcpingestion.repo.ContractDAO;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -82,7 +83,9 @@ public class ContractIngester {
 	}
 
 	// Setting Id for contract
-	private void save(ContractEntity contract) {
+	@MethodExecutionTime
+	@Transactional
+	public void save(ContractEntity contract) {
 		log.info("START ContractIngester.save()");
 
 		Optional<ContractEntity> optionalContractEntity = contractDAO.findByContractId(contract.getContractId());
