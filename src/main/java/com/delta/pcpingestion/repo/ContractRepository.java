@@ -14,7 +14,7 @@ import com.delta.pcpingestion.enums.State;
 
 @Repository
 @Transactional
-public interface ContractRepository extends JpaRepository<ContractEntity, String> {
+interface ContractRepository extends JpaRepository<ContractEntity, String> {
 
 	Optional<ContractEntity> findByContractId(String contractId);
 
