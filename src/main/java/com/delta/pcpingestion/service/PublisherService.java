@@ -1,29 +1,26 @@
 package com.delta.pcpingestion.service;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.PcpCalculationServiceClient;
 import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
 import com.delta.pcpingestion.mapper.Mapper;
-import com.delta.pcpingestion.repo.ContractRepository;
+import com.delta.pcpingestion.repo.ContractDAO;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 @Service
 @Slf4j
@@ -31,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PublisherService {
 
 	@Autowired
-	private ContractRepository repository;
+	private ContractDAO contractDAO;
 
 	@Autowired
 	private PcpCalculationServiceClient pcpCalculationClient;
@@ -73,7 +70,7 @@ public class PublisherService {
 		log.info("START PublisherService.publish()");
 
 		log.info("Start Publishing records for state {}", state);
-		List<ContractEntity> contractClaims = repository.findByPublishStatusAndStateCode(PublishStatus.STAGED.name(), state.name());
+		List<ContractEntity> contractClaims = contractDAO.findByPublishStatusAndStateCode(PublishStatus.STAGED.name(), state.name());
 
 		publish(contractClaims);
 		
@@ -101,7 +98,7 @@ public class PublisherService {
 		List<MemberContractClaimRequest> requests = mapper.mapRequest(contract);
 		pcpCalculationClient.publish(requests);
 		contract.setPublishStatus(PublishStatus.COMPLETED);
-		repository.save(contract);
+		contractDAO.save(contract);
 		log.info("END PublisherService.publish()");
 	}
 
