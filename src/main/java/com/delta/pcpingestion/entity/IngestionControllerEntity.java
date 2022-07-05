@@ -5,12 +5,17 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
+import com.delta.pcpingestion.enums.ControlStatus;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.sql.Date;
 import java.sql.Timestamp;
 
 @Getter
@@ -24,7 +29,10 @@ import java.sql.Timestamp;
 @EnableJpaAuditing
 public class IngestionControllerEntity implements Serializable {
 
-    @Id
+
+	private static final long serialVersionUID = 706822384833879511L;
+
+	@Id
     @Column(name = "id")
     private String id;
 
@@ -35,7 +43,8 @@ public class IngestionControllerEntity implements Serializable {
     private Timestamp runTimestamp;
 
     @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private ControlStatus status;
 
     @Column(name = "states")
     private String states;
@@ -50,6 +59,13 @@ public class IngestionControllerEntity implements Serializable {
 
     @Column(name = "no_of_contracts")
     private int noOfContracts;
+    
+    @Column(name = "no_of_days")
+    private int noOfDays;
+    
+    @Column(name = "cut_off_date")
+    private Date cutOffDate;
+    
 
     @Column(name = "service_instance_id")
     private String serviceInstanceId;

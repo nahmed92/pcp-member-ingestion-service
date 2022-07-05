@@ -24,7 +24,9 @@ import java.sql.Timestamp;
 @EnableJpaAuditing
 public class IngestionStatsEntity implements Serializable {
 
-    @Id
+	private static final long serialVersionUID = -3073674369630602582L;
+
+	@Id
     @Column(name = "id")
     private String id;
 

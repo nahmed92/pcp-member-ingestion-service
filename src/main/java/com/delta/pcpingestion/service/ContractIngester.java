@@ -1,9 +1,6 @@
 package com.delta.pcpingestion.service;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -12,16 +9,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.delta.pcpingestion.entity.IngestionControllerEntity;
-import com.delta.pcpingestion.enums.PublishStatus;
-import com.delta.pcpingestion.repo.IngestionControllerRepository;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.mapper.Mapper;
@@ -30,7 +26,6 @@ import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Stopwatch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Scope("prototype")
@@ -43,9 +38,7 @@ public class ContractIngester {
 	@Autowired
 	private ContractRepository repo;
 
-	@Autowired
-	private IngestionControllerRepository ingestionControllerRepo;
-
+	
 	@Value("${service.instance.id}")
 	private String serviceInstanceId;
 
@@ -88,7 +81,7 @@ public class ContractIngester {
 			if (CollectionUtils.isNotEmpty(contractEntities)) {
 				contractEntities.forEach(this::save);
 				totalNumberOfRecords +=  contractEntities.size();
-				saveIngestionControllerEntity(runId, state.toString(), totalNumberOfRecords);
+			//	saveIngestionControllerEntity(runId, state.toString(), totalNumberOfRecords);
 			} else {
 				log.info("There is no contract to save..");
 				isMorerecods = Boolean.FALSE;
@@ -139,16 +132,12 @@ public class ContractIngester {
 		log.info("END ContractIngester.mergeAndSave()");
 	}
 
-	private void saveIngestionControllerEntity(String runId, String states, int numOfContracts) {
-		IngestionControllerEntity ingestionControllerEntity = IngestionControllerEntity.builder()
-				.id(UUID.randomUUID().toString())
-				.runId(runId)
-				.runTimestamp(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("America/Los_Angeles"))))
-				.status(PublishStatus.CREATED.name())
-				.states(states)
-				.noOfContracts(numOfContracts)
-				.serviceInstanceId(serviceInstanceId)
-				.build();
-		ingestionControllerRepo.save(ingestionControllerEntity);
+	public void ingest(IngestionControllerEntity entity) {
+		
+		ingestByState(State.valueOf(entity.getStates()), entity.getCutOffDate().toLocalDate(), entity.getNoOfDays());
+		
+		
 	}
+
+	
 }
