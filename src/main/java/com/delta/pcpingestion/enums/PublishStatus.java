@@ -6,5 +6,7 @@ public enum PublishStatus {
 	STAGED,
 	COMPLETED,
 	ERROR,
-	REPROCESS
+	REPROCESS, 
+	INVALID_PROVIDER,
+	CREATED
 }

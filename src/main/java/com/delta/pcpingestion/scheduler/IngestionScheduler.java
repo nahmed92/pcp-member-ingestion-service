@@ -24,11 +24,11 @@ public class IngestionScheduler {
 
 	@Scheduled(cron = "0 0 * * * *")
 	@MethodExecutionTime
-	public void scheduleIngest() {
-		log.info("START IngestionScheduler.scheduleIngest()");
+	public void ingest() {
+		log.info("START IngestionScheduler.ingest()");
 	
 		ingestionService.ingest();
 
-		log.info("END IngestionScheduler.scheduleIngest()");
+		log.info("END IngestionScheduler.ingest()");
 	}
 }

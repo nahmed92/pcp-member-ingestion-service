@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.delta.pcpingestion.service.IngestionService;
+import com.delta.pcpingestion.service.IngestionControllerService;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 
 import io.swagger.annotations.Api;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberIngestionScheduler {
 
 	@Autowired
-	private IngestionService ingestionService;
+	private IngestionControllerService service;
 
 	@ApiOperation(value = "Schedule ingestion ", response = String.class)
 	@ApiResponses({ @ApiResponse(code = 200, message = "Successfully start ingestion", response = Boolean.class), })
@@ -37,7 +37,7 @@ public class MemberIngestionScheduler {
 	public ResponseEntity<Boolean> schedule() {
 		log.info("START MemberIngestionScheduler.schedule()");
 
-		ingestionService.ingest();
+		service.populateControl();
 
 		log.info("END MemberIngestionScheduler.schedule()");
 

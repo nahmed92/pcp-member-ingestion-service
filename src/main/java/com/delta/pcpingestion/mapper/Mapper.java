@@ -173,23 +173,28 @@ public class Mapper {
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			for (Claim claim : enrollee.getClaims()) {
-				MemberContractClaimRequest request = map(contract.getContractId(), enrollee, claim);
-				requestList.add(request);
+				MemberContractClaimRequest request = map(contract.getContractID(), enrollee, claim);
+				if(null != request) {
+					requestList.add(request);	
+				}				
 			}
 		}
 		return requestList;
 	}
 
 	private MemberContractClaimRequest map(String contractId, Enrollee enrollee, Claim claim) {
-		MemberContractClaimRequest validateProviderRequest = MemberContractClaimRequest.builder()
-				.claimId(claim.getClaimId()) //
-				.contractId(contractId) //
-				.memberId(enrollee.getMemberId()) //
-				.providerId(claim.getBillingProviderId()) //
-				.operatorId("PCP-ING") //
-				.state(claim.getStateCode()) //
-				.build();
-		return validateProviderRequest;
+		if(StringUtils.startsWithIgnoreCase(claim.getBillingProviderId(), "DC")) {
+			return MemberContractClaimRequest.builder()
+					.claimId(claim.getClaimId()) //
+					.contractId(contractId) //
+					.memberId(enrollee.getMemberId()) //
+					.providerId(claim.getBillingProviderId()) //
+					.operatorId("PCP-ING") //
+					.state(claim.getStateCode()) //
+					.build();
+		}
+		log.warn("Provider Id is not valid provider in claim {} ", claim);
+		return null;
 	}
 
 }

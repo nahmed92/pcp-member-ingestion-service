@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,9 +16,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.delta.pcpingestion.entity.IngestionControllerEntity;
+import com.delta.pcpingestion.enums.ControlStatus;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.PCPConfigServiceClient;
+import com.delta.pcpingestion.repo.IngestionControllerRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -34,12 +39,19 @@ public class IngestionService {
 
 	@Autowired
 	private ContractIngester contractIngester;
+	
+	@Autowired
+	private IngestionControllerRepository repo;
 
-	@Value("${pcp.ingestion.process.workers.count:8}")
+
+	@Value("${pcp.ingestion.process.workers.count:4}")
 	private Integer pcpIngestionProcessWorkersCount;
 
 	@Value("${pcp.ingestion.service.numOfDays:10}")
 	private Integer numOfDays;
+	
+	@Value("${service.instance.id}")
+	private String serviceInstanceId;
 
 	private ExecutorService executor;
 
@@ -56,42 +68,48 @@ public class IngestionService {
 	public void ingest() {
 		log.info("START PCPIngestionService.ingest()");
 
-		ingestFromTibco();
+		//ingestFromTibco();
+		ingestFromController();
 		
 		log.info("END PCPIngestionService.ingest()");
 	}
 
-	@MethodExecutionTime
-	@Synchronized
-	public void ingestFromTibco() {
-		log.info("START PCPIngestionService.ingestFromTibco()");
-		String lookbackDays = configClient.claimLookBackDays();
-		LocalDate cutOffDate = LocalDate.now().minusDays(Integer.parseInt(lookbackDays));
+	@Transactional
+	private void ingestFromController() {
+		log.info("START IngestionService.ingestFromController()");
 		
-		log.info("lookbackDays {}, cutOffDate {}",lookbackDays,cutOffDate);
+		//FIXME: loop while u get null results
+		//FIXME: submit to executor
+		boolean recordPresent = false;
+		do {
+			Optional<IngestionControllerEntity> entityOptional = repo.readCreated();
+			
+			if(entityOptional.isPresent()) {
+				recordPresent=true;
+				IngestionControllerEntity entity=entityOptional.get();
+				executor.submit(() -> {
+					ingest(entity);	
+				});
+				
+			}else {
+				recordPresent=false;
+			}
+				
+		}while(recordPresent);
 		
-		Stopwatch stopwatch = Stopwatch.createStarted();
 		
-		CountDownLatch latch = new CountDownLatch(State.values().length);
+		log.info("END IngestionService.ingestFromController()");
 		
-		for (State state : State.values()) {
-			 executor.submit(() -> {
-				 try {
-					 contractIngester.ingestByState(state, cutOffDate, numOfDays);
-				 }finally {
-					latch.countDown();
-				}
-			});
-		}
-		try {
-			latch.await(); // wait for all tasks to complete
-		} catch (Exception e) {
-			//Do nothing
-		}
-		stopwatch.stop();
-		log.info("Completed ingestion in {}  seconds ",stopwatch.elapsed(TimeUnit.SECONDS));
+	}
+
+	private void ingest(IngestionControllerEntity entity) {
+		entity.setStatus(ControlStatus.IN_PROGRESS);
+		entity.setServiceInstanceId(serviceInstanceId);
+		repo.save(entity);
 		
-		log.info("END PCPIngestionService.ingestFromTibco()");
+		contractIngester.ingest(entity);
+		entity.setStatus(ControlStatus.COMPLETED);
+		repo.save(entity);
 	}
 
 }

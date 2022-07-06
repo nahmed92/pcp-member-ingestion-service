@@ -18,9 +18,9 @@ public class PublisherScheduler {
 
 	@Scheduled(cron = "0 0 * * * *")
 	@MethodExecutionTime
-	public void schedulePostContractDataOnPCPCalculationFixedRateTask() {
-		log.info("START PublisherScheduler.schedulePostContractDataOnPCPCalculationFixedRateTask()");
+	public void publish() {
+		log.info("START PublisherScheduler.publish()");
 		publisherService.publish();
-		log.info("END PublisherScheduler.schedulePostContractDataOnPCPCalculationFixedRateTask()");
+		log.info("END PublisherScheduler.publish()");
 	}
 }
