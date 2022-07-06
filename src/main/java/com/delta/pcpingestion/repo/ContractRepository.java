@@ -9,12 +9,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.delta.pcpingestion.entity.ContractEntity;
-import com.delta.pcpingestion.enums.PublishStatus;
-import com.delta.pcpingestion.enums.State;
 
 @Repository
 @Transactional
-public interface ContractRepository extends JpaRepository<ContractEntity, String> {
+interface ContractRepository extends JpaRepository<ContractEntity, String> {
 
 	Optional<ContractEntity> findByContractId(String contractId);
 

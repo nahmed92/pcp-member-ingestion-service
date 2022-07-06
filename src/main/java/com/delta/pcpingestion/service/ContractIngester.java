@@ -26,12 +26,25 @@ import com.delta.pcpingestion.entity.IngestionStatsEntity;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.mapper.Mapper;
+
 import com.delta.pcpingestion.repo.ContractRepository;
 import com.delta.pcpingestion.repo.IngestionStatsRepository;
+
+import com.delta.pcpingestion.repo.ContractDAO;
+
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Stopwatch;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")
@@ -42,7 +55,7 @@ public class ContractIngester {
 	private TibcoClient tibcoClient;
 
 	@Autowired
-	private ContractRepository repo;
+	ContractDAO contractDAO;
 
 	@Autowired
 	private IngestionStatsRepository statsRepo;
@@ -54,7 +67,7 @@ public class ContractIngester {
 	@Autowired
 	private Mapper mapper;
 
-	DateTimeFormatter df = DateTimeFormatter.ofPattern("dd-MMM-yy");
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
 	@MethodExecutionTime
 	@Transactional
@@ -120,14 +133,16 @@ public class ContractIngester {
 	}
 
 	// Setting Id for contract
-	private void save(ContractEntity contract) {
+	@MethodExecutionTime
+	@Transactional
+	public void save(ContractEntity contract) {
 		log.info("START ContractIngester.save()");
 
-		Optional<ContractEntity> optionalContractEntity = repo.findByContractId(contract.getContractId());
+		Optional<ContractEntity> optionalContractEntity = contractDAO.findByContractId(contract.getContractId());
 		if (optionalContractEntity.isEmpty()) {
 			contract.setId(UUID.randomUUID().toString());
 			log.info("Saving contract {}", contract);
-			repo.save(contract);
+			contractDAO.save(contract);
 		} else {
 
 			ContractEntity dbContract = optionalContractEntity.get();
@@ -143,7 +158,7 @@ public class ContractIngester {
 
 		ContractEntity mergedEntity = mapper.merge(dbContractEntity, contractEntity);
 
-		repo.save(mergedEntity);
+		contractDAO.save(mergedEntity);
 		/*
 		 * LocalDate lastUpdateDate =
 		 * dbContractEntity.getLastUpdatedAt().toLocalDateTime().toLocalDate(); // TODO

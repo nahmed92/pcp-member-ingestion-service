@@ -1,6 +1,7 @@
 package com.delta.pcpingestion.mapper;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,7 +40,7 @@ public class Mapper {
 	}
 
 	public ContractEntity merge(ContractEntity dbContractEntity, ContractEntity contractEntity) {
-
+		log.info("START Mapper.merge");
 		Contract dbContract = convertToContract(dbContractEntity.getContractJson());
 
 		Contract contract = convertToContract(contractEntity.getContractJson());
@@ -52,13 +53,16 @@ public class Mapper {
 			mergedContractEntity = map(mergedContract);
 
 			mergedContractEntity.setId(dbContractEntity.getId());
+		} else  {
+			log.warn("Merge contract entity is null.");
 		}
+		log.info("END Mapper.merge");
 		return mergedContractEntity;
 	}
 
 	private Contract merge(Contract dbContract, Contract contract) {
 
-		if (StringUtils.equals(dbContract.getContractID(), contract.getContractID())) {
+		if (StringUtils.equals(dbContract.getContractId(), contract.getContractId())) {
 
 			if (CollectionUtils.isNotEmpty(contract.getEnrollees())) {
 				for (Enrollee enrollee : contract.getEnrollees()) {
@@ -121,7 +125,7 @@ public class Mapper {
 		Set<String> claimIds = new HashSet<>();
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
-			mtvPersionIds.add(enrollee.getMtvPersonID());
+			mtvPersionIds.add(enrollee.getMtvPersonId());
 			for (Claim claim : enrollee.getClaims()) {
 				stateCodes.add(claim.getStateCode());
 				claimIds.add(claim.getClaimId());
@@ -129,12 +133,13 @@ public class Mapper {
 		}
 		// setting contractId for validation if already not exist
 		// or save before one week
-		entity.setContractId(contract.getContractID());
+		entity.setContractId(contract.getContractId());
 		entity.setContractJson(convertIntoString(contract));
 		entity.setNumberOfEnrollee(contract.getEnrollees().size());
 		entity.setMtvPersonIds(String.join(",", mtvPersionIds));
 		entity.setClaimIds(String.join(",", claimIds));
 		entity.setStateCodes(String.join(",", stateCodes));
+		entity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 		return entity;
 	}
 
