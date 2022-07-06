@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.ControlStatus;
@@ -29,27 +30,14 @@ public class IngestionControllerService {
 	@Autowired
 	private IngestionControllerRepository repo;
 
-	@Value("${enable.ingestion.controller}")
-	private Boolean enableIngestionController;
-
 	@Autowired
 	private PCPConfigServiceClient configClient;
 
 	@Value("${pcp.ingestion.service.numOfDays:10}")
 	private Integer numOfDays;
 
-	/**
-	 * Called from scheduler
-	 */
-	public void schedule() {
-		log.info("START IngestionControllerService.schedule()");
-		log.info("enableIngestionController:{}", enableIngestionController);
-		if (enableIngestionController) {
-			populateControl();
-		}
-		log.info("END IngestionControllerService.schedule()");
-	}
 
+	@Transactional
 	public void populateControl() {
 		log.info("START IngestionControllerService.populateControl()");
 
@@ -58,6 +46,7 @@ public class IngestionControllerService {
 
 		log.info("lookbackDays {}, cutOffDate {}", lookbackDays, cutOffDate);
 
+		//FIXME: check if pending records.
 		List<IngestionControllerEntity> entities = generateEntities(cutOffDate, numOfDays);
 
 		repo.saveAll(entities);

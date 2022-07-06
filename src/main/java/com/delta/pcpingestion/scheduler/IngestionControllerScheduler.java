@@ -29,17 +29,21 @@ public class IngestionControllerScheduler {
 
 	@Value("${service.instance.id}")
 	private String serviceInstanceId;
+	
+	@Value("${enable.ingestion.controller}")
+	private Boolean enableIngestionController;
+
 
 	@Scheduled(cron = "0 0 * * * *")
 	@MethodExecutionTime
 	public void schedule() {
 		log.info("START IngestionColtrollerScheduler.ingest()");
 
-		if (StringUtils.equals(serviceInstanceId, controllerAllowedInstanceId)) {
-			service.schedule();
+		if (StringUtils.equals(serviceInstanceId, controllerAllowedInstanceId)  && enableIngestionController) {
+			service.populateControl();
 		} else {
-			log.info("Not scheduling, as serviceInstanceId{}, and controllerAllowedInstanceId {} are not same",
-					serviceInstanceId, controllerAllowedInstanceId);
+			log.info("Not scheduling, as serviceInstanceId{}, controllerAllowedInstanceId {}, enableIngestionController {}",
+					serviceInstanceId, controllerAllowedInstanceId,enableIngestionController);
 		}
 
 		log.info("END IngestionColtrollerScheduler.ingest()");

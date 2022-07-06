@@ -22,6 +22,7 @@ import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.PCPConfigServiceClient;
 import com.delta.pcpingestion.repo.IngestionControllerRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
+import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -40,10 +41,10 @@ public class IngestionService {
 	private ContractIngester contractIngester;
 	
 	@Autowired
-	private IngestionControllerRepository ingestionControllerRepo;
+	private IngestionControllerRepository repo;
 
 
-	@Value("${pcp.ingestion.process.workers.count:8}")
+	@Value("${pcp.ingestion.process.workers.count:4}")
 	private Integer pcpIngestionProcessWorkersCount;
 
 	@Value("${pcp.ingestion.service.numOfDays:10}")
@@ -79,51 +80,36 @@ public class IngestionService {
 		
 		//FIXME: loop while u get null results
 		//FIXME: submit to executor
-		IngestionControllerEntity entity = ingestionControllerRepo.read();
+		boolean recordPresent = false;
+		do {
+			Optional<IngestionControllerEntity> entityOptional = repo.readCreated();
+			
+			if(entityOptional.isPresent()) {
+				recordPresent=true;
+				IngestionControllerEntity entity=entityOptional.get();
+				executor.submit(() -> {
+					ingest(entity);	
+				});
+				
+			}else {
+				recordPresent=false;
+			}
+				
+		}while(recordPresent);
 		
-		entity.setStatus(ControlStatus.IN_PROGRESS);
-		entity.setServiceInstanceId(serviceInstanceId);
-		
-		contractIngester.ingest(entity);
-		entity.setStatus(ControlStatus.COMPLETED);
-		ingestionControllerRepo.save(entity);
 		
 		log.info("END IngestionService.ingestFromController()");
 		
 	}
 
-	@MethodExecutionTime
-	@Synchronized
-	@Deprecated
-	public void ingestFromTibco() {
-		log.info("START PCPIngestionService.ingestFromTibco()");
-		String lookbackDays = configClient.claimLookBackDays();
-		LocalDate cutOffDate = LocalDate.now().minusDays(Integer.parseInt(lookbackDays));
+	private void ingest(IngestionControllerEntity entity) {
+		entity.setStatus(ControlStatus.IN_PROGRESS);
+		entity.setServiceInstanceId(serviceInstanceId);
+		repo.save(entity);
 		
-		log.info("lookbackDays {}, cutOffDate {}",lookbackDays,cutOffDate);
-		
-		Stopwatch stopwatch = Stopwatch.createStarted();
-		
-		CountDownLatch latch = new CountDownLatch(State.values().length);
-		
-		for (State state : State.values()) {
-			 executor.submit(() -> {
-				 try {
-					 contractIngester.ingestByState(state, cutOffDate, numOfDays);
-				 }finally {
-					latch.countDown();
-				}
-			});
-		}
-		try {
-			latch.await(); // wait for all tasks to complete
-		} catch (Exception e) {
-			//Do nothing
-		}
-		stopwatch.stop();
-		log.info("Completed ingestion in {}  seconds ",stopwatch.elapsed(TimeUnit.SECONDS));
-		
-		log.info("END PCPIngestionService.ingestFromTibco()");
+		contractIngester.ingest(entity);
+		entity.setStatus(ControlStatus.COMPLETED);
+		repo.save(entity);
 	}
 
 }

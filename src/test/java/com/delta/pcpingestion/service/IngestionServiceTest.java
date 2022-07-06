@@ -3,6 +3,7 @@ package com.delta.pcpingestion.service;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.repo.ContractRepository;
@@ -62,7 +64,12 @@ public class IngestionServiceTest {
 				
 		when(tibcoClient.fetchContracts(param)).thenReturn(Lists.list(entity));
 		LocalDate cutOffDays  = LocalDate.now().minusDays(5);
-		contractIngester.ingestByState(State.CA, cutOffDays, 5);
+		IngestionControllerEntity controllEntity = IngestionControllerEntity.builder()
+				.states("CA")
+				.cutOffDate(Date.valueOf( cutOffDays))
+				.noOfDays(5)
+				.build();
+		contractIngester.ingest(controllEntity);
 		Mockito.verify(tibcoClient, times(1)).fetchContracts(ArgumentMatchers.any(Map.class));
 		
 	}
