@@ -173,7 +173,7 @@ public class Mapper {
 
 		for (Enrollee enrollee : contract.getEnrollees()) {
 			for (Claim claim : enrollee.getClaims()) {
-				MemberContractClaimRequest request = map(contract.getContractID(), enrollee, claim);
+				MemberContractClaimRequest request = map(contract.getContractId(), enrollee, claim);
 				if(null != request) {
 					requestList.add(request);	
 				}				

@@ -33,7 +33,6 @@ import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
-import com.delta.pcpingestion.repo.ContractRepository;
 
 import java.time.LocalDate;
 import java.util.HashMap;

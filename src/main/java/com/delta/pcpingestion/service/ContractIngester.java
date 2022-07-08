@@ -13,7 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.bouncycastle.util.Times;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -23,11 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.entity.IngestionStatsEntity;
-import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.mapper.Mapper;
 
-import com.delta.pcpingestion.repo.ContractRepository;
 import com.delta.pcpingestion.repo.IngestionStatsRepository;
 
 import com.delta.pcpingestion.repo.ContractDAO;
@@ -35,16 +32,8 @@ import com.delta.pcpingestion.repo.ContractDAO;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")
