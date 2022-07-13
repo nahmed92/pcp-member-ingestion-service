@@ -27,6 +27,7 @@ import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.repo.ContractDAO;
 import com.delta.pcpingestion.repo.IngestionControllerRepository;
+import com.delta.pcpingestion.repo.IngestionStatsRepository;
 
 @ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
@@ -42,6 +43,10 @@ public class IngestionControllerServiceTest {
 
 	@Mock
 	private IngestionControllerRepository repo;
+	
+	@Mock
+	private IngestionStatsRepository statsRepo;
+
 
 	@Mock
 	private com.delta.pcpingestion.interservice.PCPConfigServiceClient configClient;
@@ -49,8 +54,6 @@ public class IngestionControllerServiceTest {
 	@InjectMocks
 
 	private ContractIngester contractIngester;
-
-	private IngestionControllerService ingestionControllerService;
 
 	@Test
 	public void testIngestByState() throws Exception {
