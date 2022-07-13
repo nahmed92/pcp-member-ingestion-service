@@ -13,6 +13,7 @@ import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
 import com.delta.pcpingestion.repo.ContractDAO;
+import com.delta.pcpingestion.repo.IngestionStatsRepository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
@@ -25,6 +26,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -52,6 +54,9 @@ public class IngestionServiceTest {
 
 	@Mock
 	private ContractDAO repository;
+	
+	@Mock
+	private IngestionStatsRepository statsRepo;
 
 	@Mock
 	private TibcoClient tibcoClient;

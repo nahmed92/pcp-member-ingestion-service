@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.ControlStatus;
 
-@SpringBootTest
+//@SpringBootTest
 public class IngestionControllerRepositoryTest {
 
 	@Autowired
@@ -30,7 +30,7 @@ public class IngestionControllerRepositoryTest {
 		repo.save(entity);
 	}
 	
-	@Test
+	//@Test
 	public void testFindAll() {
 		List<IngestionControllerEntity> entities =  repo.findAll();
 		
