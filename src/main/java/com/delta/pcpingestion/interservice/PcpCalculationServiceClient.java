@@ -34,7 +34,7 @@ public class PcpCalculationServiceClient {
 	private RestTemplate restTemplate;
  
 
-	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.maxattempts:3}")
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.max.attempts:3}")
 	public void publish(List<MemberContractClaimRequest> request)
 			throws RuntimeException {
 		log.info("START PcpCalculationServiceClient.publish()");

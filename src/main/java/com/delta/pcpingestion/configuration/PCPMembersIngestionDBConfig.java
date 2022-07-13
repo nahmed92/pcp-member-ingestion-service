@@ -25,13 +25,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @EnableAutoConfiguration
-@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory",
-transactionManagerRef = "transactionManager",
-basePackages = { "com.delta.pcpingestion.repo" })
+@EnableJpaRepositories(entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager", basePackages = {
+		"com.delta.pcpingestion.repo" })
 public class PCPMembersIngestionDBConfig {
-	
-    @Autowired
-    private Environment env;
+
+	@Autowired
+	private Environment env;
 
 	@Primary
 	@Bean(name = "dataSource")
@@ -44,34 +43,25 @@ public class PCPMembersIngestionDBConfig {
 	@Bean(name = "entityManagerFactory")
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder,
 			@Qualifier("dataSource") DataSource dataSource) {
-		LocalContainerEntityManagerFactoryBean em
-         = new LocalContainerEntityManagerFactoryBean();
-       em.setDataSource(dataSource());
-       em.setPackagesToScan(
-         new String[] { "com.delta.pcpingestion.entity" });
+		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+		em.setDataSource(dataSource());
+		em.setPackagesToScan(new String[] { "com.delta.pcpingestion.entity" });
+		em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
-       HibernateJpaVendorAdapter vendorAdapter
-         = new HibernateJpaVendorAdapter();
-       em.setJpaVendorAdapter(vendorAdapter);
-       HashMap<String, Object> properties = new HashMap<>();     
-       properties.put("hibernate.hbm2ddl.auto",
-         env.getProperty("spring.jpa.hibernate.ddl-auto"));
-       properties.put("hibernate.dialect",
-         env.getProperty("spring.jpa.properties.hibernate.dialect"));
-       properties.put("spring.jpa.show-sql",
-    	         env.getProperty("spring.jpa.show-sql"));
-       properties.put("spring.jpa.properties.hibernate.format_sql",
-  	         env.getProperty("spring.jpa.properties.hibernate.format_sql"));
-       properties.put("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation", "true");
-       em.setJpaPropertyMap(properties);       
+		HashMap<String, Object> properties = new HashMap<>();
+		properties.put("hibernate.dialect", env.getProperty("spring.jpa.properties.hibernate.dialect"));
+		properties.put("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation", "true");
+		em.setJpaPropertyMap(properties);
 
-       return em;
+		return em;
 	}
 
 	@Primary
 	@Bean(name = "transactionManager")
 	public PlatformTransactionManager transactionManager(
 			@Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
-		return new JpaTransactionManager(entityManagerFactory);
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManager.setEntityManagerFactory(entityManagerFactory);
+		return transactionManager;
 	}
 }

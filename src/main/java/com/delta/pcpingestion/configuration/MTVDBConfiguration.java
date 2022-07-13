@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 //  transactionManagerRef = "mtvTransactionManager", basePackages = {
 //  "com.delta.pcpingestion.mtv.repo" })
 @Slf4j
+@Deprecated
 public class MTVDBConfiguration {
 	
 	@Autowired
@@ -44,16 +45,7 @@ public class MTVDBConfiguration {
 		Properties properties = new Properties();
 		properties.setProperty("hibernate.dialect", 
 				env.getProperty("metavance.database.hibernate.dialect"));
-		properties.setProperty("hibernate.show_sql",
-				env.getProperty("spring.jpa.show-sql"));
-		properties.setProperty("spring.jpa.hibernate.ddl-auto",
-				env.getProperty("spring.jpa.hibernate.ddl-auto"));
-		properties.setProperty("metavance.database.jdbcUrl", 
-				env.getProperty("metavance.database.jdbcUrl"));
-		properties.setProperty("spring.jpa.show-sql", 
-				env.getProperty("spring.jpa.show-sql"));
-		properties.setProperty("spring.jpa.properties.hibernate.format_sql", 
-				env.getProperty("spring.jpa.properties.hibernate.format_sql"));
+		properties.setProperty("metavance.database.jdbcUrl",env.getProperty("metavance.database.jdbcUrl"));
 		properties.setProperty("spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation", "true");
 		LocalContainerEntityManagerFactoryBean emf = builder.dataSource(dataSource)
 				.packages("com.delta.pcpingestion.mtv.entities").persistenceUnit("mtvPU").build();
