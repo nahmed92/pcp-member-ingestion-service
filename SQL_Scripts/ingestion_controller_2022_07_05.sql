@@ -10,7 +10,7 @@ CREATE TABLE dbo.ingestion_controller (
 	no_of_contracts int NULL,
 	no_of_days int NULL,
 	cut_off_date date,
-	service_instance_id varchar(50) NULL,
+	service_instance_id varchar(50) NOT NULL,
 	PRIMARY KEY (id)
 );
 
