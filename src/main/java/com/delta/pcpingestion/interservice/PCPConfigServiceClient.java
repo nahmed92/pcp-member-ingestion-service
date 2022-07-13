@@ -38,7 +38,7 @@ public class PCPConfigServiceClient {
 	@Autowired(required=true)
 	private RestTemplate restTemplate;
 	
-	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.config.service.retry.maxattempts:3}")
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.config.service.retry.max.attempts:3}")
 	public String claimLookBackDays() {
 		log.info("START PCPConfigService.claimLookBackDays");
 		String claimLookBackDaysEndPoint = pcpConfigServiceEndpoint.concat(PCPConfigServiceConstants.CLAIM_LOOKBACK_DAYS);

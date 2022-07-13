@@ -26,15 +26,16 @@ public class IngestionControllerScheduler {
 
 	@Value("${controller.allowed.instance.id}")
 	private String controllerAllowedInstanceId;
-
+	
 	@Value("${service.instance.id}")
 	private String serviceInstanceId;
 	
 	@Value("${enable.ingestion.controller}")
 	private Boolean enableIngestionController;
+	
 
-
-	@Scheduled(cron = "0 0 * * * *")
+	//@Scheduled(cron = "0 0 * * * *")
+	@Scheduled(cron = "${scheduling.job.ingestion.controller.cron}")
 	@MethodExecutionTime
 	public void schedule() {
 		log.info("START IngestionColtrollerScheduler.ingest()");

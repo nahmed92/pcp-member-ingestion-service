@@ -2,13 +2,11 @@ package com.delta.pcpingestion.service;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -21,19 +19,9 @@ import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
 import com.delta.pcpingestion.mapper.Mapper;
 import com.delta.pcpingestion.repo.ContractDAO;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 @Service
 @Slf4j
@@ -49,22 +37,15 @@ public class PublisherService {
 	@Value("${pcp.ingestion.service.isUsedTibco}")
 	private Boolean isUsedTibco = Boolean.TRUE;
 
-	@Value("${pcp.ingestion.process.workers.count:5}")
-	private Integer pcpIngestionProcessWorkersCount;
-
+	
 	@Value("${pcp.ingestion.service.numOfDays:10}")
 	private Integer numOfDays;
 
+	@Qualifier("publisherExecutor")
 	private ExecutorService executor;
 
 	@Autowired
 	private Mapper mapper;
-
-	@PostConstruct
-	public void init() {
-		ThreadFactory tf = new ThreadFactoryBuilder().setNameFormat("Publisher-tp-%d").build();
-		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount, tf);
-	}
 
 	@MethodExecutionTime
 	@Synchronized

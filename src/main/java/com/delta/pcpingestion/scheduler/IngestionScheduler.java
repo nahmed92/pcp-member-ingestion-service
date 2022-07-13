@@ -21,14 +21,15 @@ public class IngestionScheduler {
 
 	@Autowired
 	private IngestionService ingestionService;
-
-	@Scheduled(cron = "0 0 * * * *")
+	
+	//@Scheduled(cron = "0 0 * * * *")
+	@Scheduled(cron = "${scheduling.job.ingestion.cron}")
 	@MethodExecutionTime
 	public void ingest() {
 		log.info("START IngestionScheduler.ingest()");
 	
 		ingestionService.ingest();
-
+		
 		log.info("END IngestionScheduler.ingest()");
 	}
 }

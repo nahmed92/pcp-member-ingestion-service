@@ -1,32 +1,22 @@
 package com.delta.pcpingestion.service;
 
-import java.time.LocalDate;
-import java.util.concurrent.CountDownLatch;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.ControlStatus;
-import com.delta.pcpingestion.enums.State;
-import com.delta.pcpingestion.interservice.PCPConfigServiceClient;
 import com.delta.pcpingestion.repo.IngestionControllerRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
 import com.google.common.base.Optional;
-import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -35,78 +25,87 @@ import lombok.extern.slf4j.Slf4j;
 public class IngestionService {
 
 	@Autowired
-	private PCPConfigServiceClient configClient;
-
-	@Autowired
 	private ContractIngester contractIngester;
-	
+
 	@Autowired
 	private IngestionControllerRepository repo;
 
-
-	@Value("${pcp.ingestion.process.workers.count:4}")
-	private Integer pcpIngestionProcessWorkersCount;
-
-	@Value("${pcp.ingestion.service.numOfDays:10}")
-	private Integer numOfDays;
-	
 	@Value("${service.instance.id}")
 	private String serviceInstanceId;
 
+	@Autowired
+	@Qualifier("ingestionExecutor")
 	private ExecutorService executor;
 
-	@PostConstruct
-	public void init() {
-		 
-		ThreadFactory tf = new ThreadFactoryBuilder().setNameFormat("Ingestion-tp-%d").build();
-		executor = Executors.newFixedThreadPool(pcpIngestionProcessWorkersCount, tf);
-		
-	}
-
-	@MethodExecutionTime
 	@Async
+	@MethodExecutionTime
+	@Transactional
 	public void ingest() {
 		log.info("START PCPIngestionService.ingest()");
 
-		//ingestFromTibco();
-		ingestFromController();
-		
+		// ingestFromTibco();
+		ingestByControlStatus(ControlStatus.CREATED);
+
 		log.info("END PCPIngestionService.ingest()");
 	}
 
+	@MethodExecutionTime
 	@Transactional
-	private void ingestFromController() {
-		log.info("START IngestionService.ingestFromController()");
+	public void ingestInProgress() {
+		log.info("START PCPIngestionService.ingestInProgress()");
+
+		List<IngestionControllerEntity> entities = repo.findAllByStatusAndServiceInstanceId(ControlStatus.IN_PROGRESS,serviceInstanceId);
+
+		log.info("Processing pending records {}",entities);
 		
-		//FIXME: loop while u get null results
-		//FIXME: submit to executor
+		entities.forEach(this::ingest);
+
+		log.info("END PCPIngestionService.ingestInProgress()");
+	}
+
+	private void ingestByControlStatus(ControlStatus status) {
+		log.info("START IngestionService.ingestByControlStatus()");
+
+		// FIXME: loop while u get null results
+		// FIXME: submit to executor
 		boolean recordPresent = false;
 		do {
-			Optional<IngestionControllerEntity> entityOptional = repo.readCreated();
-			
-			if(entityOptional.isPresent()) {
-				recordPresent=true;
-				IngestionControllerEntity entity=entityOptional.get();
+			Optional<IngestionControllerEntity> entityOptional = readEntityAndUpdate(status);
+
+			if (entityOptional.isPresent()) {
+				recordPresent = true;
+				IngestionControllerEntity entity = entityOptional.get();
+				repo.save(entity);
 				executor.submit(() -> {
-					ingest(entity);	
+					ingest(entity);
 				});
-				
-			}else {
-				recordPresent=false;
+
+			} else {
+				recordPresent = false;
 			}
-				
-		}while(recordPresent);
-		
-		
-		log.info("END IngestionService.ingestFromController()");
-		
+
+		} while (recordPresent);
+
+		log.info("END IngestionService.ingestByControlStatus()");
+
+	}
+
+	private Optional<IngestionControllerEntity> readEntityAndUpdate(ControlStatus status) {
+		log.info("START IngestionService.readEntityAndUpdate()");
+		log.info("Processing for {} ", status);
+		Optional<IngestionControllerEntity> entityOptional = repo.findFirstByStatusAndServiceInstanceId(status,
+				serviceInstanceId);
+		if (entityOptional.isPresent()) {
+			IngestionControllerEntity entity = entityOptional.get();
+			entity.setStatus(ControlStatus.IN_PROGRESS);
+			entity.setServiceInstanceId(serviceInstanceId);
+			repo.save(entity);
+		}
+		log.info("END IngestionService.readEntityAndUpdate()");
+		return entityOptional;
 	}
 
 	private void ingest(IngestionControllerEntity entity) {
-		entity.setStatus(ControlStatus.IN_PROGRESS);
-		entity.setServiceInstanceId(serviceInstanceId);
-		repo.save(entity);
-		
 		contractIngester.ingest(entity);
 		entity.setStatus(ControlStatus.COMPLETED);
 		repo.save(entity);

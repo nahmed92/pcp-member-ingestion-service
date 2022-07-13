@@ -27,13 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TibcoClient {
 
-	@Value("${pcp.ingestion.service.tibco.url}")
+	@Value("${tibco.client.url}")
 	private String tibcoPcpMemberUrl;
 
-	@Value("${pcp.ingestion.service.basicAuthUser}")
+	@Value("${tibco.client.user}")
 	private String basicAuthUser;
 
-	@Value("${pcp.ingestion.service.basicAuthPassword}")
+	@Value("${tibco.client.password}")
 	private String basicAuthPassword;
 
 	//private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
@@ -45,7 +45,7 @@ public class TibcoClient {
 	@Autowired
 	private Mapper mapper;
 
-	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.tibco.service.retry.maxattempts:3}")
+	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${tibco.call.retry.max.attempts:3}")
 	public List<ContractEntity> fetchContracts(Map<String, String> params) {
 		log.info("START TibcoClient.fetchContracts()");
 		String tibcoRequest = StrSubstitutor.replace(tibcoQueryStr, params);

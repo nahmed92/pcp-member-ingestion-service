@@ -9,15 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.delta.pcpingestion.entity.ContractEntity;
-import com.delta.pcpingestion.enums.State;
-import com.delta.pcpingestion.interservice.tibco.TibcoClient;
-import com.delta.pcpingestion.repo.ContractDAO;
-import com.delta.pcpingestion.repo.IngestionControllerRepository;
-
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -32,16 +24,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
-import com.delta.pcpingestion.enums.State;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import com.delta.pcpingestion.repo.ContractDAO;
+import com.delta.pcpingestion.repo.IngestionControllerRepository;
 
 @ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
@@ -54,7 +39,7 @@ public class IngestionControllerServiceTest {
 
 	@Mock
 	private TibcoClient tibcoClient;
-	
+
 	@Mock
 	private IngestionControllerRepository repo;
 
@@ -62,12 +47,10 @@ public class IngestionControllerServiceTest {
 	private com.delta.pcpingestion.interservice.PCPConfigServiceClient configClient;
 
 	@InjectMocks
-	
-	private ContractIngester contractIngester;
-	
-	private IngestionControllerService ingestionControllerService;
-	
 
+	private ContractIngester contractIngester;
+
+	private IngestionControllerService ingestionControllerService;
 
 	@Test
 	public void testIngestByState() throws Exception {
@@ -77,19 +60,14 @@ public class IngestionControllerServiceTest {
 		param.put("state", "CA");
 		param.put("numofdays", "5");
 		param.put("receiveddate", LocalDate.now().toString());
-		
-				
+
 		when(tibcoClient.fetchContracts(param)).thenReturn(Lists.list(entity));
-		LocalDate cutOffDays  = LocalDate.now().minusDays(5);
-		IngestionControllerEntity controllEntity = IngestionControllerEntity.builder()
-				.states("CA")
-				.cutOffDate(Date.valueOf( cutOffDays))
-				.noOfDays(5)
-				.build();
+		LocalDate cutOffDays = LocalDate.now().minusDays(5);
+		IngestionControllerEntity controllEntity = IngestionControllerEntity.builder().states("CA")
+				.cutOffDate(Date.valueOf(cutOffDays)).noOfDays(5).build();
 		contractIngester.ingest(controllEntity);
 		Mockito.verify(tibcoClient, times(1)).fetchContracts(ArgumentMatchers.any(Map.class));
-		
+
 	}
-	
 
 }

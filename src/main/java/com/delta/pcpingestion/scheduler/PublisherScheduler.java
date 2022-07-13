@@ -16,7 +16,8 @@ public class PublisherScheduler {
 	@Autowired
 	private PublisherService publisherService;
 
-	@Scheduled(cron = "0 0 * * * *")
+//	@Scheduled(cron = "0 5 * * * *")
+	@Scheduled(cron = "${scheduling.job.publisher.cron}")
 	@MethodExecutionTime
 	public void publish() {
 		log.info("START PublisherScheduler.publish()");
