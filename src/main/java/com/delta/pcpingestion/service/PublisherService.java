@@ -34,8 +34,8 @@ public class PublisherService {
 	@Autowired
 	private PcpCalculationServiceClient pcpCalculationClient;
 
-	@Value("${pcp.ingestion.service.isUsedTibco}")
-	private Boolean isUsedTibco = Boolean.TRUE;
+	//@Value("${pcp.ingestion.service.isUsedTibco}")
+	//private Boolean isUsedTibco = Boolean.TRUE;
 
 	
 	@Value("${pcp.ingestion.service.numOfDays:10}")
@@ -101,8 +101,8 @@ public class PublisherService {
 		log.info("END PublisherService.publish()");
 	}
 
-	public void enableDisbaleTibcoServiceCall(Boolean isUsedTibco) {
-		log.info(isUsedTibco == true ? "Enabled Tibco Service Call" : "Disabled Tibco Service Call");
-		this.isUsedTibco = isUsedTibco;
-	}
+	//public void enableDisbaleTibcoServiceCall(Boolean isUsedTibco) {
+	//	log.info(isUsedTibco == true ? "Enabled Tibco Service Call" : "Disabled Tibco Service Call");
+		//this.isUsedTibco = isUsedTibco;
+	//}
 }
