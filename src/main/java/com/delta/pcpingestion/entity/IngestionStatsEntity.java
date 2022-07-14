@@ -17,6 +17,7 @@ import java.sql.Timestamp;
 @Setter
 @Entity
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Transactional

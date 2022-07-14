@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Transactional
+@ToString
 @Table(name = "ingestion_controller", schema = "dbo")
 @EnableJpaAuditing
 public class IngestionControllerEntity implements Serializable {
