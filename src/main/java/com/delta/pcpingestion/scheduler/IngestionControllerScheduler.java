@@ -35,7 +35,8 @@ public class IngestionControllerScheduler {
 	
 
 	//@Scheduled(cron = "0 0 * * * *")
-	@Scheduled(cron = "${scheduling.job.ingestion.controller.cron}")
+	//@Scheduled(cron = "${scheduling.job.ingestion.controller.cron}")
+	@Scheduled(initialDelayString = "${scheduling.job.ingestion.controller.delay}", fixedDelayString = "${scheduling.job.ingestion.controller.delay}")
 	@MethodExecutionTime
 	public void schedule() {
 		log.info("START IngestionColtrollerScheduler.ingest()");

@@ -67,8 +67,8 @@ ENTRYPOINT java $JAVA_OPTS \
     -Dpcp.ingestion.service.num.of.days=${PCP_INGESTION_SERVICE_NUM_OF_DAYS} \
     -Dingestion.workers.count=${INGESTION_WORKERS_COUNT} \
     -Dpublisher.workers.count=${PUBLISHER_WORKERS_COUNT} \
-    -Dscheduling.job.ingestion.cron=${SCHEDULING_JOB_INGESTION_CRON} \
-    -Dscheduling.job.ingestion.controller.cron=${SCHEDULING_JOB_INGESTION_CONTROLLER_CRON} \
-    -Dscheduling.job.publisher.cron=${SCHEDULING_JOB_PUBLISHER_CRON} \
+    -Dscheduling.job.ingestion.controller.delay=${SCHEDULING_JOB_INGESTION_CONTROLLER_DELAY} \
+    -Dscheduling.job.ingestion.delay=${SCHEDULING_JOB_INGESTION_DELAY} \
+    -Dscheduling.job.publisher.delay=${SCHEDULING_JOB_PUBLISHER_DELAY} \
     -Djavax.net.ssl.trustStore=/usr/java/latest/jre/lib/security/cacerts \
     -jar /pcp-member-ingestion-service-1.0.0.jar

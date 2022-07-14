@@ -23,7 +23,8 @@ public class IngestionScheduler {
 	private IngestionService ingestionService;
 	
 	//@Scheduled(cron = "0 0 * * * *")
-	@Scheduled(cron = "${scheduling.job.ingestion.cron}")
+	//@Scheduled(cron = "${scheduling.job.ingestion.cron}")
+	@Scheduled(initialDelayString = "${scheduling.job.ingestion.delay}", fixedDelayString = "${scheduling.job.ingestion.delay}")
 	@MethodExecutionTime
 	public void ingest() {
 		log.info("START IngestionScheduler.ingest()");
