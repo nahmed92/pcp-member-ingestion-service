@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -23,8 +24,11 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
 @ComponentScan(basePackages = { "com.delta.pcpingestion.*" })
+@Slf4j
 public class ApplicationConfig {
 
 	@Value("${ingestion.workers.count:2}")
@@ -32,6 +36,16 @@ public class ApplicationConfig {
 
 	@Value("${publisher.workers.count:2}")
 	private Integer publisherWorkerCount;
+	
+	@Value("${scheduling.job.ingestion.controller.cron}")
+	private String ingestionControllerCron;
+	
+	@PostConstruct
+	public void init() {
+		log.info("START ApplicationConfig.init()");
+		log.info("ingestionControllerCron={}",ingestionControllerCron);
+		log.info("END ApplicationConfig.init()");
+	}
 
 	@Bean("publisherExecutor")
 	public ExecutorService initPublisherService() {

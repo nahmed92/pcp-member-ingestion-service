@@ -44,6 +44,7 @@ ENTRYPOINT java $JAVA_OPTS \
     -Dspring.jpa.hibernate.naming.physical-strategy=${JPA_NAMING_PHYSICAL_STRATEGY} \
     -Dspring.mssql.datasource.driver-class=${SPRING_MSSQL_DATASOURCE_DRIVE_CLASS} \
     -Dspring.mssql.datasource.jdbc-url=${SPRING_MSSQL_DATASOURCE_JDBC_URL} \
+    -Dspring.mssql.datasource.url=${SPRING_MSSQL_DATASOURCE_JDBC_URL} \
     -Dspring.mssql.datasource.username=${SPRING_MSSQL_DATASOURCE_USERNAME} \
     -Dspring.mssql.datasource.password=${SPRING_MSSQL_DATASOURCE_PASSWORD} \    
     -Dmetavance.database.jdbcUrl=${METAVANCE_DATABASE_JDBC_URL} \
