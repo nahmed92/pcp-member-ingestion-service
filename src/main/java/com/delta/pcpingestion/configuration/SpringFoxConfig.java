@@ -28,7 +28,6 @@ public class SpringFoxConfig implements WebMvcConfigurer {
 				.build();
 	}
 
-	//FIXME: revisit
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addRedirectViewController("/null/api-docs", "/api-docs").setKeepQueryParams(true);

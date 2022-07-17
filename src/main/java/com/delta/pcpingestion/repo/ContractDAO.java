@@ -26,18 +26,14 @@ public class ContractDAO {
 
 
     public Optional<ContractEntity> findByContractId(String contractId){
-
-        Optional<ContractEntity> contractEntity = contractRepository.findByContractId(contractId);
-        return contractEntity;
+      return contractRepository.findByContractId(contractId);
     }
 
     public List<ContractEntity> findByPublishStatusAndStateCode(String publishStatus, String state){
-        List<ContractEntity> contractEntities = contractRepository.findByPublishStatusAndStateCode(publishStatus, state);
-        return contractEntities;
+        return contractRepository.findByPublishStatusAndStateCode(publishStatus, state);
     }
 
     public void save(ContractEntity contractEntity){
-    	//FIXME: read max row instead of find all
         Optional<List<ContractAuditEntity>> auditEntityOpt = contractAuditRepository.findAllByContractId(contractEntity.getContractId());
         int max = 0;
         if(auditEntityOpt.isPresent()) {
@@ -52,7 +48,7 @@ public class ContractDAO {
 
     private ContractAuditEntity buildContractAuditEntity(ContractEntity contractEntity, int max) {
 
-        ContractAuditEntity contractAuditEntity = ContractAuditEntity.builder().
+        return ContractAuditEntity.builder().
             contractAuditPK(ContractAuditPK.builder().id(contractEntity.getId()).revisionNumber(max).build() )
                 .contractId(contractEntity.getContractId())
                 .claimIds(contractEntity.getClaimIds())
@@ -66,6 +62,5 @@ public class ContractDAO {
                 .lastUpdatedAt(contractEntity.getLastUpdatedAt())
                 .revisionType(max == 0 ? RevisionType.CREATE : RevisionType.UPDATE)
                 .build();
-         return contractAuditEntity;
     }
 }

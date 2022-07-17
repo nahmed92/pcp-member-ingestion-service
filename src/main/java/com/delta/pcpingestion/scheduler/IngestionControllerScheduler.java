@@ -31,7 +31,7 @@ public class IngestionControllerScheduler {
 	private String serviceInstanceId;
 	
 	@Value("${enable.ingestion.controller}")
-	private Boolean enableIngestionController;
+	private boolean enableIngestionController;
 	
 
 	//@Scheduled(cron = "0 0 * * * *")

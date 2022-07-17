@@ -25,6 +25,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.delta.pcpingestion.enums.PCPMemberIngestionErrors;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,11 +51,10 @@ public class PCPConfigServiceClient {
 		try {
 			setMessageConverter(restTemplate);
 			responseEntity = restTemplate.exchange(new URI(uriBuilder), HttpMethod.GET,  new HttpEntity<>(headers), String.class);
-		} catch (RestClientException e) {
-			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
-		} catch (URISyntaxException e) {
-			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
-		}
+		 } catch (RestClientException | URISyntaxException e) {
+	            log.error("Error calling Config service request {}", e);
+	            throw PCPMemberIngestionErrors.PCP_SERVICE_ERROR.createException();
+	    }
 		if(responseEntity.getStatusCode() == HttpStatus.OK) {
 			return responseEntity.getBody();
 		} 
@@ -63,7 +63,7 @@ public class PCPConfigServiceClient {
 	}
 	
 	private static void setMessageConverter(RestTemplate restTemplate) {
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();        
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();        
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));  
 		messageConverters.add(new FormHttpMessageConverter());

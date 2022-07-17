@@ -5,7 +5,6 @@ import java.util.HashMap;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,9 +28,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 		"com.delta.pcpingestion.repo" })
 public class PCPMembersIngestionDBConfig {
 
-	@Autowired
-	private Environment env;
-
 	@Primary
 	@Bean(name = "dataSource")
 	@ConfigurationProperties(prefix = "spring.mssql.datasource")
@@ -42,10 +38,10 @@ public class PCPMembersIngestionDBConfig {
 	@Primary
 	@Bean(name = "entityManagerFactory")
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(EntityManagerFactoryBuilder builder,
-			@Qualifier("dataSource") DataSource dataSource) {
+			@Qualifier("dataSource") DataSource dataSource, Environment env) {
 		LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 		em.setDataSource(dataSource());
-		em.setPackagesToScan(new String[] { "com.delta.pcpingestion.entity" });
+		em.setPackagesToScan( "com.delta.pcpingestion.entity" );
 		em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
 		HashMap<String, Object> properties = new HashMap<>();

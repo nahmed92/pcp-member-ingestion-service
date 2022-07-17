@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.enums.PCPMemberIngestionErrors;
 import com.delta.pcpingestion.enums.PublishStatus;
 import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
 import com.delta.pcpingestion.interservice.tibco.dto.Claim;
@@ -34,7 +35,7 @@ public class Mapper {
 
 	public List<ContractEntity> map(final List<Contract> contracts) {
 		log.info("START Mapper.map()");
-		List<ContractEntity> memberContract = contracts.stream().map(c -> map(c)).collect(Collectors.toList());
+		List<ContractEntity> memberContract = contracts.stream().map(this::map).collect(Collectors.toList());
 		log.info("END Mapper.map()");
 		return memberContract;
 	}
@@ -47,27 +48,18 @@ public class Mapper {
 
 		Contract mergedContract = merge(dbContract, contract);
 
-		ContractEntity mergedContractEntity = null;
-
-		if (mergedContract != null) {
-			mergedContractEntity = map(mergedContract);
-
-			mergedContractEntity.setId(dbContractEntity.getId());
-		} else  {
-			log.warn("Merge contract entity is null.");
-		}
+		ContractEntity mergedContractEntity =  map(mergedContract);
+        mergedContractEntity.setId(dbContractEntity.getId());
 		log.info("END Mapper.merge");
 		return mergedContractEntity;
 	}
 
 	private Contract merge(Contract dbContract, Contract contract) {
 
-		if (StringUtils.equals(dbContract.getContractId(), contract.getContractId())) {
-
-			if (CollectionUtils.isNotEmpty(contract.getEnrollees())) {
+		if (StringUtils.equals(dbContract.getContractId(), contract.getContractId()) &&
+				CollectionUtils.isNotEmpty(contract.getEnrollees())) {
 				for (Enrollee enrollee : contract.getEnrollees()) {
 					merge(dbContract, enrollee);
-				}
 			}
 		}
 		return dbContract;
@@ -83,7 +75,6 @@ public class Mapper {
 		}
 		for (Enrollee e : dbEnrollees) {
 			if (StringUtils.equals(e.getMemberId(), enrollee.getMemberId())) {
-				// merge claims;
 				merge(e, enrollee.getClaims());
 
 				return;
@@ -149,7 +140,7 @@ public class Mapper {
 			contractStr = objectMapper.writeValueAsString(contract);
 		} catch (final JsonProcessingException e) {
 			log.error("Unable to convert to string ", e);
-			throw new RuntimeException("Error while create contract Json [" + e.getMessage() + "]");
+			throw PCPMemberIngestionErrors.PCP_SERVICE_ERROR.createException(e.getMessage());
 		}
 		return contractStr;
 	}
@@ -160,7 +151,7 @@ public class Mapper {
 			contract = objectMapper.readValue(contractString.getBytes(), Contract.class);
 		} catch (final IOException e) {
 			log.error("Unable to convert to string ", e);
-			throw new RuntimeException("Error while create contract Json [" + e.getMessage() + "]");
+			throw PCPMemberIngestionErrors.INTERNAL_SERVER_ERROR.createException(e.getMessage());
 		}
 		return contract;
 	}

@@ -1,19 +1,18 @@
 package com.delta.pcpingestion.repo;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.stereotype.Repository;
 
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.ControlStatus;
-import com.google.common.base.Optional;
 
 @Repository
 public interface IngestionControllerRepository extends JpaRepository<IngestionControllerEntity, String> {

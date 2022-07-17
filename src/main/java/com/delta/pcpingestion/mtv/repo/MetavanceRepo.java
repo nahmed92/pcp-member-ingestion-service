@@ -27,6 +27,6 @@ public interface MetavanceRepo extends JpaRepository<MbrProvNtwkAssn, Long> {
 	          + "where bus_level_6_id=cast(:state as CHAR(25)) and bus_level_5_id='DDIC DHMO'  and VOID_FLAG='N' and audit_flag='N' "
 	          + "and end_date > sysdate) and LAST_MAINT_TS > cast(:last_maint_ts as CHAR(50)) and rownum < 100 order by LAST_MAINT_TS" ,
 	          nativeQuery = true)
-	List<MbrProvNtwkAssn> findAllAfterFirstHunderedMTVMemberContractEntity(@Param("state") String state, @Param("last_maint_ts") Timestamp last_maint_ts);
+	List<MbrProvNtwkAssn> findAllAfterFirstHunderedMTVMemberContractEntity(@Param("state") String state, @Param("last_maint_ts") Timestamp lastMaintTs);
 
 }

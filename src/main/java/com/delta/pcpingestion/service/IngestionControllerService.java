@@ -42,6 +42,8 @@ public class IngestionControllerService {
 
 	private String[] serviceInstances; 
 	
+	private static final String TIME_ZONE = "America/Los_Angeles";
+	
 	@PostConstruct
 	public void init() {
 		log.info("START IngestionControllerService.init()");
@@ -60,7 +62,6 @@ public class IngestionControllerService {
 
 		log.info("lookbackDays {}, cutOffDate {}", lookbackDays, cutOffDate);
 
-		// FIXME: check if pending records.
 		List<IngestionControllerEntity> entities = generateEntities(cutOffDate, numOfDays);
 
 		repo.saveAll(entities);
@@ -76,8 +77,6 @@ public class IngestionControllerService {
 		String runId = UUID.randomUUID().toString();
 
 		log.info("runId {}", runId);
-
-		// FIXME: Group States
 		
 		State[] states =  State.values();
 		for (int i=0;i<states.length;i++) {
@@ -88,9 +87,9 @@ public class IngestionControllerService {
 
 	private IngestionControllerEntity generateEntity(String runId, String states, LocalDate cutOffDate, int numOfDays,String serviceInstanceId) {
 		return IngestionControllerEntity.builder().id(UUID.randomUUID().toString()).runId(runId)
-				.runTimestamp(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("America/Los_Angeles"))))
-				.createdAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("America/Los_Angeles"))))
-				.lastUpdatedAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("America/Los_Angeles"))))
+				.runTimestamp(Timestamp.valueOf(LocalDateTime.now(ZoneId.of(TIME_ZONE))))
+				.createdAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of(TIME_ZONE))))
+				.lastUpdatedAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of(TIME_ZONE))))
 				.cutOffDate(Date.valueOf(cutOffDate))
 				.serviceInstanceId(serviceInstanceId)
 				.status(ControlStatus.CREATED).states(states).noOfContracts(0).noOfDays(numOfDays).build();

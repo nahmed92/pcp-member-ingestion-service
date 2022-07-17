@@ -3,18 +3,15 @@ package com.delta.pcpingestion.service;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -25,89 +22,102 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.delta.pcpingestion.entity.ContractEntity;
 import com.delta.pcpingestion.entity.IngestionControllerEntity;
-import com.delta.pcpingestion.enums.ControlStatus;
 import com.delta.pcpingestion.interservice.tibco.TibcoClient;
-import com.delta.pcpingestion.repo.IngestionControllerRepository;
-
-import lombok.extern.slf4j.Slf4j;
+import com.delta.pcpingestion.mapper.Mapper;
+import com.delta.pcpingestion.repo.ContractDAO;
+import com.delta.pcpingestion.repo.IngestionStatsRepository;
 
 @ExtendWith(SpringExtension.class)
 @EnableAutoConfiguration
 @TestInstance(Lifecycle.PER_CLASS)
-@DisplayName("When Testing PCP Member Ingestion Service Impl")
-@Configuration
-@Slf4j
-public class IngestionServiceTest {
-
-	@Mock
-	private IngestionControllerRepository repo;
-
+@DisplayName("Contract Ingester Service Test")
+public class ContractIngesterTest {
+	
 	@Mock
 	private TibcoClient tibcoClient;
 
 	@Mock
-	private ContractIngester contractIngester;
+	ContractDAO contractDAO;
+
+	@Mock
+	private IngestionStatsRepository statsRepo;
 	
 	@Mock
-	private ExecutorService executor = Executors.newFixedThreadPool(1);
+	private Mapper mapper;
+	
 	
 	@InjectMocks
-	private IngestionService ingestionService;
+	private ContractIngester contractIngester;
 	
 	@Test
-	public void testIngestByState() throws Exception {
-    	ReflectionTestUtils.setField(ingestionService, "serviceInstanceId", "Test");
-		ContractEntity entity = getContractEntity();
-		Map<String, String> param = new HashMap<>();
-		param.put("state", "CA");
-		param.put("numofdays", "5");
-		param.put("receiveddate", LocalDate.now().toString());		
-				
-		when(tibcoClient.fetchContracts(param)).thenReturn(Lists.list(entity));
-		doReturn(Optional.of(getIngestionControllerEntity()),Optional.empty()).when(repo).findFirstByStatusAndServiceInstanceId(ControlStatus.CREATED,"Test");
-		ingestionService.ingest();
-		Mockito.verify(repo, atLeastOnce()).save(ArgumentMatchers.any());
-		
-	}
+	public void testIngest() throws Exception{
+	ReflectionTestUtils.setField(contractIngester, "serviceInstanceId", "test-inst");
+	ContractEntity contractEntity = getContractEntity();
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+	Map<String, String> param = new HashMap<>();
+	param.put("state", "CA");
+	param.put("numofdays", "5");
+	param.put("receiveddate", LocalDate.now().format(df));
+	param.put("pagenum", "0");
 	
-	@Test
-	public void testIngestInProgress() throws Exception {
-    	ReflectionTestUtils.setField(ingestionService, "serviceInstanceId", "Test");
-		ContractEntity entity = getContractEntity();
-		Map<String, String> param = new HashMap<>();
-		param.put("state", "CA");
-		param.put("numofdays", "5");
-		param.put("receiveddate", LocalDate.now().toString());		
-				
-		when(tibcoClient.fetchContracts(param)).thenReturn(Lists.list(entity));
-		doReturn(List.of(getIngestionControllerEntity())).when(repo).findAllByStatusAndServiceInstanceId(ControlStatus.IN_PROGRESS,"Test");
-		ingestionService.ingestInProgress();
-		Mockito.verify(repo, atLeastOnce()).save(ArgumentMatchers.any());
-		
-	}
-
-
-   
-    private IngestionControllerEntity getIngestionControllerEntity() {
-    return IngestionControllerEntity.builder().id("123")
-			.runId("123")
-			.serviceInstanceId("localhost")
-			.status(ControlStatus.CREATED)
-			.states("CA,NY")
+	doReturn(List.of(contractEntity)).when(tibcoClient).fetchContracts(param);
+	LocalDate cutOffDays  = LocalDate.now().minusDays(2);
+	IngestionControllerEntity controllEntity = IngestionControllerEntity.builder()
+			.states("CA")
+			.cutOffDate(Date.valueOf( cutOffDays))
+			.noOfContracts(1)
+			.noOfDays(5)
 			.build();
-    }
-    
+	contractIngester.ingest(controllEntity);
+	Mockito.verify(tibcoClient, atLeastOnce()).fetchContracts(ArgumentMatchers.anyMap());	
+	}
+	
+	@Test
+	public void testIngestWhenNoRecordFromTibco() throws Exception{
+	ReflectionTestUtils.setField(contractIngester, "serviceInstanceId", "test-inst");
+	DateTimeFormatter df = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+	Map<String, String> param = new HashMap<>();
+	param.put("state", "CA");
+	param.put("numofdays", "5");
+	param.put("receiveddate", LocalDate.now().format(df));
+	param.put("pagenum", "0");
+	
+	doReturn(List.of()).when(tibcoClient).fetchContracts(param);
+	LocalDate cutOffDays  = LocalDate.now().minusDays(2);
+	IngestionControllerEntity controllEntity = IngestionControllerEntity.builder()
+			.states("CA")
+			.cutOffDate(Date.valueOf( cutOffDays))
+			.noOfContracts(1)
+			.noOfDays(5)
+			.build();
+	contractIngester.ingest(controllEntity);
+	Mockito.verify(tibcoClient, atLeastOnce()).fetchContracts(ArgumentMatchers.anyMap());	
+	}
+	
+	
+	@Test
+	public void testSaveAllreadyExistContract() {
+        doReturn(Optional.of(getContractEntity())).when(contractDAO).findByContractId("1192845828");
+		contractIngester.save(getContractEntity());
+		Mockito.verify(contractDAO, atLeastOnce()).save(ArgumentMatchers.any());
+	}
+	
+	@Test
+	public void testSave() {
+        doReturn(Optional.empty()).when(contractDAO).findByContractId("1192845828");
+		contractIngester.save(getContractEntity());
+		Mockito.verify(contractDAO, atLeastOnce()).save(ArgumentMatchers.any());
+	}
+	
     private ContractEntity getContractEntity() {
     	return ContractEntity.builder()
     			.claimIds("20220706040584")
     			.contractId("1192845828")
-    			.id(UUID.randomUUID().toString())
     			.contractJson("{\r\n"
     					+ "   \"contractID\":\"1192845828\",\r\n"
     					+ "   \"groupNumber\":null,\r\n"
@@ -140,6 +150,4 @@ public class IngestionServiceTest {
     					+ "}")
     			.build();
     }
-	
-
 }

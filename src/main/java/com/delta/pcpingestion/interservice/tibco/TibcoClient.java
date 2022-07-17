@@ -36,7 +36,6 @@ public class TibcoClient {
 	@Value("${tibco.client.password}")
 	private String basicAuthPassword;
 
-	//private String tibcoQueryStr = "{'pcpMembersRequest':'{\"states\":[${state}],\"numofdays\":${numofdays},\"receiveddate\":\"${receiveddate}\",\"pagenum\":${pagenum}}'}";
 	private String tibcoQueryStr = "{'memberProviderAssignment':'{\"states\":[${state}],\"numberOfDays\":${numofdays},\"receivedDate\":\"${receiveddate}\",\"pageNumber\":${pagenum}}'}";
 
 	@Autowired
@@ -52,8 +51,11 @@ public class TibcoClient {
 		List<ContractEntity> contracts = List.of();
 		ResponseEntity<Member> response = callTibco(tibcoRequest);
 
-		if (null != response && null != response.getBody() && null != response.getBody().getPcpMembers()) {
-			contracts = mapper.map(response.getBody().getPcpMembers().getContracts());
+		if (response != null && response.getBody() != null) {
+			Member member = response.getBody();
+			if(member != null && member.getPcpMembers() != null) {
+			contracts = mapper.map(member.getPcpMembers().getContracts());
+			}
 		}
 		log.info("END TibcoClient.fetchContracts()");
 		return contracts;

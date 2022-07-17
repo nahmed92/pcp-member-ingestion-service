@@ -19,7 +19,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.delta.pcpingestion.entity.ContractEntity;
+import com.delta.pcpingestion.enums.PCPMemberIngestionErrors;
 import com.delta.pcpingestion.interservice.dto.MemberContractClaimRequest;
+import com.deltadental.platform.common.exception.ServiceException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,11 +34,13 @@ public class PcpCalculationServiceClient {
 
 	@Autowired(required = true)
 	private RestTemplate restTemplate;
+	
+	private static final String  PCP_CALC_ALERT_MESSAGE = "Alert - PCP-Calculation-Service is not responding......";
  
 
 	@Retryable(value = RuntimeException.class, maxAttemptsExpression = "${pcp.calculation.service.retry.max.attempts:3}")
 	public void publish(List<MemberContractClaimRequest> request)
-			throws RuntimeException {
+			throws ServiceException {
 		log.info("START PcpCalculationServiceClient.publish()");
 		
 		UriComponentsBuilder builder = UriComponentsBuilder
@@ -53,31 +57,28 @@ public class PcpCalculationServiceClient {
 			log.info("Got Response from calculation service, response code {}",response.getStatusCode());
 
 		} catch (RestClientException | URISyntaxException e) {
-			log.error("Unable to publish ", e);
-			throw new RuntimeException("Rest Client Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
-		} catch (Exception e) {
-			log.error("Unable to publish ", e);
-			throw new RuntimeException("URI Syntax Exception [" + e.getCause() + "] and Messagge [" + e.getMessage());
-		}
+            log.error("Error calling Config service request {}", e);
+            throw PCPMemberIngestionErrors.PCP_SERVICE_ERROR.createException();
+    }
 		log.info("END PcpCalculationServiceClient.publish()");
 	}
 
 	@Recover
 	public void recover(RuntimeException t, List<ContractEntity> contracts) {
-		log.info("Alert - PCP-Calculation-Service is not responding......");
+		log.info(PCP_CALC_ALERT_MESSAGE);
 	}
 
 	@Recover
 	public ResponseEntity<MemberContractClaimRequest> recoverPublishAssignMemberPCP(RuntimeException t,
 			MemberContractClaimRequest validateProviderRequest) {
-		log.info("Alert - PCP-Calculation-Service is not responding......");
+		log.info(PCP_CALC_ALERT_MESSAGE);
 		return null;
 	}
 
 	@Recover
 	public ResponseEntity<Boolean> recoverPublishAssignMembersPCP(RuntimeException t,
 			List<MemberContractClaimRequest> validateAssignMembers) {
-		log.info("Alert - PCP-Calculation-Service is not responding......");
+		log.info(PCP_CALC_ALERT_MESSAGE);
 		return null;
 	}
 }

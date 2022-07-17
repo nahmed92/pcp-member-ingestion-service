@@ -34,9 +34,6 @@ public class PublisherService {
 	@Autowired
 	private PcpCalculationServiceClient pcpCalculationClient;
 
-	//@Value("${pcp.ingestion.service.isUsedTibco}")
-	//private Boolean isUsedTibco = Boolean.TRUE;
-
 	
 	@Value("${pcp.ingestion.service.numOfDays:10}")
 	private Integer numOfDays;
@@ -74,21 +71,18 @@ public class PublisherService {
 	}
 
 	private void publish( List<ContractEntity> contractClaims) {
-		log.info("START PublisherService.publish()");
+		log.info("START PublisherService.publish() by list of contract claims");
 
 		if (!contractClaims.isEmpty()) {
-			executor.submit(() -> {
-				// FIXME: Partition request
-				contractClaims.stream().forEach(this::publish);
-			});
+			executor.submit(() -> contractClaims.stream().forEach(this::publish));
 
 		}
-		log.info("END PublisherService.publish()");
+		log.info("END PublisherService.publish() by list of contract claims");
 
 	}
 
 	private void publish(ContractEntity contract) { // multiple contracts?
-		log.info("START PublisherService.publish()");
+		log.info("START PublisherService.publish() by ContractEntity");
 		List<MemberContractClaimRequest> requests = mapper.mapRequest(contract);
 		if(CollectionUtils.isNotEmpty(requests)) {
 			pcpCalculationClient.publish(requests);
@@ -98,11 +92,7 @@ public class PublisherService {
 			contract.setPublishStatus(PublishStatus.INVALID_PROVIDER);
 		}	
 		contractDAO.save(contract);
-		log.info("END PublisherService.publish()");
+		log.info("END PublisherService.publish() by ContractEntity");
 	}
 
-	//public void enableDisbaleTibcoServiceCall(Boolean isUsedTibco) {
-	//	log.info(isUsedTibco == true ? "Enabled Tibco Service Call" : "Disabled Tibco Service Call");
-		//this.isUsedTibco = isUsedTibco;
-	//}
 }

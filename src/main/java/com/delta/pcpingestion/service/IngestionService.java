@@ -1,6 +1,7 @@
 package com.delta.pcpingestion.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import com.delta.pcpingestion.entity.IngestionControllerEntity;
 import com.delta.pcpingestion.enums.ControlStatus;
 import com.delta.pcpingestion.repo.IngestionControllerRepository;
 import com.deltadental.platform.common.annotation.aop.MethodExecutionTime;
-import com.google.common.base.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +43,6 @@ public class IngestionService {
 	public void ingest() {
 		log.info("START PCPIngestionService.ingest()");
 
-		// ingestFromTibco();
 		ingestByControlStatus(ControlStatus.CREATED);
 
 		log.info("END PCPIngestionService.ingest()");
@@ -66,8 +65,6 @@ public class IngestionService {
 	private void ingestByControlStatus(ControlStatus status) {
 		log.info("START IngestionService.ingestByControlStatus()");
 
-		// FIXME: loop while u get null results
-		// FIXME: submit to executor
 		boolean recordPresent = false;
 		do {
 			Optional<IngestionControllerEntity> entityOptional = readEntityAndUpdate(status);
@@ -76,10 +73,7 @@ public class IngestionService {
 				recordPresent = true;
 				IngestionControllerEntity entity = entityOptional.get();
 				repo.save(entity);
-				executor.submit(() -> {
-					ingest(entity);
-				});
-
+				executor.submit(() -> ingest(entity));
 			} else {
 				recordPresent = false;
 			}

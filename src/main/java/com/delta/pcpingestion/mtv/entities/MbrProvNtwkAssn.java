@@ -33,5 +33,5 @@ public class MbrProvNtwkAssn {
 	private Date endDate;
 
 	@Column(name = "last_maint_ts")
-	private Timestamp last_maint_ts;
+	private Timestamp lastMaintTs;
 }

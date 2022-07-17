@@ -70,9 +70,9 @@ public class ContractIngester {
 		stats.setStartTime(timestamp());
 		int numberOfContracts = 0;
 		while (cutOffDate.isBefore(processDate)) {
-			params.put("state", "\"" + state.toString() + "\"");
+			params.put("state", "\"" + state + "\"");
 			params.put("numofdays", numOfDays.toString());
-			params.put("receiveddate", processDate.format(df).toString());
+			params.put("receiveddate", processDate.format(df));
 			numberOfContracts += ingestAndPersist(params);
 			processDate = processDate.minusDays(numOfDays);
 		}
@@ -92,7 +92,7 @@ public class ContractIngester {
 		log.info("START ContractIngester.ingestAndPersist()");
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		int pagenum = 0;
-		Boolean isMorerecods = Boolean.TRUE;
+		boolean isMorerecods = true;
 		int totalNumberOfRecords = 0;
 		while (isMorerecods) {
 			params.put("pagenum", "" + pagenum);
@@ -143,15 +143,6 @@ public class ContractIngester {
 		ContractEntity mergedEntity = mapper.merge(dbContractEntity, contractEntity);
 
 		contractDAO.save(mergedEntity);
-		/*
-		 * LocalDate lastUpdateDate =
-		 * dbContractEntity.getLastUpdatedAt().toLocalDateTime().toLocalDate(); // TODO
-		 * : externalize this days property LocalDate date = lastUpdateDate.plusDays(7);
-		 * boolean updateFlag = (date.isBefore(LocalDate.now())) ? true : false;
-		 * if(updateFlag) {
-		 * 
-		 * }
-		 */
 
 		log.info("END ContractIngester.mergeAndSave()");
 	}
